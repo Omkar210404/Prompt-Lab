@@ -1,0 +1,7 @@
+{"_meta": {"synthetic": true, "description": "Six made-up customer messages for the starter experiment. Replace them with your own cases."}}
+{"id": "msg-01", "vars": {"message": "The replacement arrived in two days and works perfectly. Thank you!"}, "expected": "positive", "tags": ["clear"]}
+{"id": "msg-02", "vars": {"message": "I have been waiting three weeks and nobody answers my emails."}, "expected": "negative", "tags": ["clear"]}
+{"id": "msg-03", "vars": {"message": "Can you tell me which sizes this jacket comes in?"}, "expected": "neutral", "tags": ["clear"]}
+{"id": "msg-04", "vars": {"message": "Great, another update that logs me out every five minutes."}, "expected": "negative", "tags": ["sarcasm"]}
+{"id": "msg-05", "vars": {"message": "The app is fine now, but the first month was a mess."}, "expected": "neutral", "tags": ["mixed"]}
+{"id": "msg-06", "vars": {"message": "Honestly the best support call I have ever had."}, "expected": "positive", "tags": ["clear"]}

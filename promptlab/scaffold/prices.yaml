@@ -1,0 +1,16 @@
+# Price table: USD per 1 million tokens, keyed by the model name sent to the provider.
+#
+# prompt-lab ships no real prices, because they change. Copy the current numbers from your
+# provider's pricing page and note where and when you read them. A model with no entry here
+# gets a cost of "n/a" in reports, never $0.
+
+mock-model:
+  input: 0.10
+  output: 0.40
+  note: Fictional price, so the starter run can show the cost column.
+
+# your-model-name:
+#   input: 0.00
+#   output: 0.00
+#   source: <pricing page URL>
+#   checked: <date you read it>

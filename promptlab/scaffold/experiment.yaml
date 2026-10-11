@@ -1,0 +1,53 @@
+# A starter experiment. Run it with:  prompt-lab run experiment.yaml
+#
+# It uses the scripted mock provider, so it works offline with no API key.
+# Mock results show how prompt-lab works. They say nothing about any real model.
+
+name: my-first-experiment
+description: Classify the sentiment of a short customer message.
+dataset: dataset.jsonl          # one test case per line; paths are relative to this file
+
+prompts:
+  - id: v1_bare
+    template: |
+      What is the sentiment of this message?
+
+      {message}
+  - id: v2_one_word
+    template: |
+      Classify the sentiment of the message as positive, negative or neutral.
+      Reply with one lowercase word and nothing else.
+
+      Message: {message}
+
+models:
+  - id: mock-model
+    provider: mock
+    mock:
+      rules:
+        # Scripted behaviour: a prompt that does not ask for one word gets a full sentence back.
+        - when: { prompt_lacks: "one lowercase word" }
+          behave: prose_wrapped
+          prefix: "The sentiment of this message is "
+          suffix: "."
+
+  # To test a real model, add an entry like this, set the key in your environment
+  # (see .env.example), and put the model's prices in prices.yaml.
+  # - id: groq-model
+  #   provider: openai_compatible
+  #   model: <model name from your provider>
+  #   base_url: https://api.groq.com/openai/v1
+  #   api_key_env: GROQ_API_KEY       # the NAME of the variable, never the key itself
+  #   params: { temperature: 0, max_tokens: 20 }
+
+scorers:                          # every scorer runs on every test case
+  - type: exact_match             # compares the output with the case's `expected`
+  - type: length
+    max_words: 1
+
+run:
+  concurrency: 4
+  timeout_seconds: 30
+  max_retries: 2
+
+prices_file: prices.yaml
