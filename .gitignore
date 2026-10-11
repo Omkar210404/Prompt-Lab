@@ -1,0 +1,31 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# prompt-lab: response cache and run output (the two demo runs are kept)
+.promptlab/
+runs/*
+!runs/demo/
+!runs/demo-shortened/
+
+# Editors / OS
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

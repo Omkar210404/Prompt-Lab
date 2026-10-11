@@ -1,0 +1,8 @@
+typer==0.27.3
+rich==15.0.0
+PyYAML==6.0.3
+pydantic==2.14.0
+httpx==0.28.1
+jsonschema==4.26.0
+Jinja2==3.1.6
+python-dotenv==1.2.4
