@@ -1,0 +1,99 @@
+# The demo experiment pointed at REAL models, through Groq's OpenAI-compatible API.
+#
+# Unlike the mock experiments, these models read the input and write their own answer, so
+# typing your own email in the web app gets a real result.
+#
+# To use it:
+#   1. Create a key at https://console.groq.com/keys
+#   2. Put it in a file named .env in this project's root folder:   GROQ_API_KEY=your-key
+#   3. prompt-lab ui          (or: prompt-lab run examples/support_extraction_real.yaml --limit 5)
+#
+# Status: this file has NOT been run by the author, so the repository shows no results from it.
+# The model names are ones Groq served in October 2026; if one has been retired, replace it
+# with a current name from https://console.groq.com/docs/models.
+# A full run is 3 prompts x 2 models x 24 cases = 144 calls. Use --dry-run or --limit first.
+# No prices are listed for these models, so cost shows as n/a until you add them to a price table.
+
+name: support-email-extraction-real
+description: Extract order id, category, refund amount and sentiment from a support email as JSON, with real models.
+dataset: datasets/support_emails.jsonl
+
+prompts:
+  - id: v1_bare
+    template: |
+      Extract the order id, category, refund amount and sentiment from this support email.
+
+      {email}
+
+  - id: v2_json_rules
+    template: |
+      Extract fields from the support email below.
+
+      Respond with only a JSON object and no other text, with exactly these keys:
+      - "order_id": the order number, such as "ORD-12345"
+      - "category": one of "refund", "shipping", "billing", "technical", "account"
+      - "refund_amount": the amount the customer wants refunded
+      - "sentiment": one of "negative", "neutral", "positive"
+
+      Email:
+      {email}
+
+  - id: v3_fewshot
+    template: |
+      Extract fields from the support email below.
+
+      Respond with only a JSON object and no other text, with exactly these keys:
+      - "order_id": the order number, such as "ORD-12345"
+      - "category": one of "refund", "shipping", "billing", "technical", "account"
+      - "refund_amount": the amount the customer wants refunded
+      - "sentiment": one of "negative", "neutral", "positive"
+
+      Rules:
+      - If the email has no order number, use null for order_id.
+      - If several order numbers appear, use the one the request is about.
+      - If no refund is requested, use null for refund_amount.
+      - refund_amount is a plain number with no currency symbol and no commas: 49.99, not "$49.99".
+      - Use "neutral" when the tone is mixed or the email is a purely factual request.
+
+      Example 1
+      Email: Order ORD-10001 came without the charger. Please refund the $19.00 I paid for it. Annoying.
+      {"order_id": "ORD-10001", "category": "refund", "refund_amount": 19.0, "sentiment": "negative"}
+
+      Example 2
+      Email: Is there a way to turn on two-factor login?
+      {"order_id": null, "category": "account", "refund_amount": null, "sentiment": "neutral"}
+
+      Email:
+      {email}
+
+models:
+  - id: gpt-oss-20b
+    provider: openai_compatible
+    model: openai/gpt-oss-20b
+    base_url: https://api.groq.com/openai/v1
+    api_key_env: GROQ_API_KEY
+    params: { temperature: 0, max_tokens: 600, reasoning_effort: low }
+    concurrency: 2
+
+  - id: gpt-oss-120b
+    provider: openai_compatible
+    model: openai/gpt-oss-120b
+    base_url: https://api.groq.com/openai/v1
+    api_key_env: GROQ_API_KEY
+    params: { temperature: 0, max_tokens: 600, reasoning_effort: low }
+    concurrency: 2
+
+scorers:
+  - type: json_valid
+  - type: json_schema
+    schema_file: schemas/ticket.schema.json
+  - type: json_fields
+    fields: [order_id, category, sentiment]
+  - type: numeric
+    field: refund_amount
+    abs_tol: 0.01
+
+run:
+  concurrency: 2          # low on purpose: free tiers have tight rate limits
+  timeout_seconds: 60
+  max_retries: 3
