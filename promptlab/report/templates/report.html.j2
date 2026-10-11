@@ -106,8 +106,8 @@ input[type="search"] { width: 190px; }
 #grid td.preview { color: var(--ink-2); max-width: 360px; }
 .tag { display: inline-block; font-size: 11.5px; color: var(--ink-2); background: var(--surface-3); border-radius: 4px; padding: 0 6px; margin: 1px 4px 1px 0; }
 .verdict { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.verdict .dot {
-  width: 18px; height: 18px; border-radius: 50%; display: inline-grid; place-items: center;
+.dot {
+  width: 18px; height: 18px; flex: none; border-radius: 50%; display: inline-grid; place-items: center;
   font-size: 11px; font-weight: 700; color: #fff; line-height: 1;
 }
 .dot.pass { background: var(--good); } .dot.fail { background: var(--bad); }
@@ -127,7 +127,8 @@ pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--in
 .empty { color: var(--muted); padding: 14px 0; }
 .count { color: var(--muted); font-size: 13px; margin-left: auto; }
 
-.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+.two { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr); gap: 28px; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
 .jump { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left; font-family: var(--mono); font-size: 12.5px; }
 .jump:hover { text-decoration: underline; }
 .why { color: var(--ink-2); font-size: 13px; overflow-wrap: anywhere; }
