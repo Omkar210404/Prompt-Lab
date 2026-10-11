@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ summary.experiment }} · prompt-lab report</title>
+<style>
+:root {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #222220; --surface-3: #2a2a28;
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
+  --good: #0ca30c; --warn: #fab219; --bad: #d03b3b; --accent: #3987e5;
+  --s0: #898781; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 1180px; margin: 0 auto; padding: 28px 16px 64px; }
+h1 { font-size: 24px; margin: 0 0 4px; font-weight: 650; }
+h2 { font-size: 16px; margin: 0 0 4px; font-weight: 650; }
+p { margin: 0; }
+.sub { color: var(--ink-2); }
+.muted { color: var(--muted); }
+.note { color: var(--ink-2); font-size: 13px; margin-bottom: 14px; max-width: 110ch; }
+code, pre, .mono { font-family: var(--mono); font-size: 12.5px; }
+section {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px 20px; margin-top: 16px;
+}
+.banner {
+  margin-top: 16px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--warn);
+  background: rgba(250, 178, 25, 0.10); display: flex; gap: 10px; align-items: flex-start;
+}
+.banner .icon { color: var(--warn); font-weight: 700; }
+.warning { margin-top: 10px; color: var(--ink-2); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 24px; margin-top: 14px; }
+.fact dt { color: var(--muted); font-size: 12px; }
+.fact dd { margin: 0; overflow-wrap: anywhere; }
+dl { margin: 0; }
+
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+.key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
+{% for n in range(0, 9) %}
+.s{{ n }} { background: var(--s{{ n }}); }
+{% endfor %}
+
+/* Pass-rate chart: horizontal bars on one 0-100% axis. */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--ink-2); font-size: 13px; margin-bottom: 12px; }
+.chart { --label: 170px; --model: 150px; --tail: 104px; }
+.cgroup { display: grid; grid-template-columns: var(--label) 1fr; align-items: center; padding: 6px 0; }
+.cgroup + .cgroup { border-top: 1px solid var(--grid); }
+.cgroup-label { font-weight: 600; overflow-wrap: anywhere; padding-right: 12px; }
+.crow { display: grid; grid-template-columns: var(--model) 1fr; align-items: center; }
+.chart.single { --model: 0px; }
+.chart.single .cmodel { display: none; }
+.cmodel { color: var(--ink-2); font-size: 12.5px; overflow-wrap: anywhere; padding-right: 10px; }
+.ctrack {
+  position: relative; height: 24px; margin-right: var(--tail); cursor: default; outline: none;
+  border-left: 1px solid var(--axis); border-right: 1px solid var(--grid);
+  background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px);
+  background-size: 25% 100%; background-position: -1px 0;
+}
+.cbar { position: absolute; left: 0; top: 5px; height: 14px; border-radius: 0 4px 4px 0; min-width: 0; }
+.ctrack:hover .cbar, .ctrack:focus-visible .cbar { filter: brightness(1.2); }
+.ctrack:focus-visible { box-shadow: 0 0 0 2px var(--accent); border-radius: 2px; }
+.cval { position: absolute; top: 2px; padding-left: 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.caxis { display: grid; grid-template-columns: var(--label) 1fr; margin-top: 4px; }
+.cticks { position: relative; height: 18px; margin-left: var(--model); margin-right: var(--tail); color: var(--muted); font-size: 12px; }
+.cticks span { position: absolute; transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+.cticks span:first-child { transform: none; }
+#tip {
+  position: fixed; z-index: 10; pointer-events: none; display: none; max-width: 320px;
+  background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5); font-size: 13px;
+}
+#tip strong { display: block; font-size: 15px; }
+#tip .line { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+
+.meter { display: block; height: 3px; background: var(--grid); border-radius: 2px; margin-top: 4px; min-width: 56px; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+
+/* Side-by-side grid */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 12px; }
+.controls label { color: var(--ink-2); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+button, select, input[type="search"] { font: inherit; color: var(--ink); }
+.seg button { background: transparent; border: 0; padding: 5px 11px; cursor: pointer; color: var(--ink-2); }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--surface-3); color: var(--ink); font-weight: 600; }
+select, input[type="search"] { background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; padding: 5px 8px; }
+input[type="search"] { width: 190px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#grid tbody tr.case { cursor: pointer; }
+#grid tbody tr.case:hover td { background: var(--surface-2); }
+#grid tbody tr.open td { background: var(--surface-2); border-bottom-color: transparent; }
+#grid td.preview { color: var(--ink-2); max-width: 360px; }
+.tag { display: inline-block; font-size: 11.5px; color: var(--ink-2); background: var(--surface-3); border-radius: 4px; padding: 0 6px; margin: 1px 4px 1px 0; }
+.verdict { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.verdict .dot {
+  width: 18px; height: 18px; border-radius: 50%; display: inline-grid; place-items: center;
+  font-size: 11px; font-weight: 700; color: #fff; line-height: 1;
+}
+.dot.pass { background: var(--good); } .dot.fail { background: var(--bad); }
+.dot.err { background: var(--warn); color: #1a1a19; }
+.caret { color: var(--muted); display: inline-block; width: 14px; }
+tr.detail > td { padding: 4px 10px 18px; background: var(--surface-2); }
+.case-io { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+.box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.box h3 { margin: 0 0 6px; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.box .label { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; margin: 8px 0 3px; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); max-height: 300px; overflow: auto; }
+.reasons { list-style: none; margin: 0; padding: 0; }
+.reasons li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; padding: 3px 0; align-items: start; }
+.reasons .dot { margin-top: 2px; }
+.reasons b { font-weight: 600; }
+.empty { color: var(--muted); padding: 14px 0; }
+.count { color: var(--muted); font-size: 13px; margin-left: auto; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+.jump { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left; font-family: var(--mono); font-size: 12.5px; }
+.jump:hover { text-decoration: underline; }
+.why { color: var(--ink-2); font-size: 13px; overflow-wrap: anywhere; }
+details { border-top: 1px solid var(--grid); padding: 8px 0; }
+details:first-of-type { border-top: 0; }
+summary { cursor: pointer; font-weight: 600; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 20px; }
+@media (max-width: 720px) {
+  .chart { --label: 100px; --model: 96px; --tail: 92px; }
+  .cgroup { grid-template-columns: 1fr; }
+  .caxis { grid-template-columns: 1fr; } .caxis > :first-child { display: none; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>{{ summary.experiment }}</h1>
+    {% if summary.description %}<p class="sub">{{ summary.description }}</p>{% endif %}
+  </header>
+
+  {% if mock_note %}
+  <div class="banner" role="note">
+    <span class="icon" aria-hidden="true">!</span>
+    <p><strong>Mock results.</strong> {{ mock_note }}</p>
+  </div>
+  {% endif %}
+
+  <section aria-labelledby="h-run">
+    <h2 id="h-run">Run</h2>
+    <dl class="facts">
+      <div class="fact"><dt>Run id</dt><dd class="mono">{{ summary.run_id }}</dd></div>
+      <div class="fact"><dt>Started (UTC)</dt><dd>{{ summary.started_at | replace("+00:00", "Z") }}, took {{ summary.duration_seconds }}s</dd></div>
+      <div class="fact"><dt>Config hash</dt><dd class="mono">{{ summary.config_hash[:16] }}</dd></div>
+      <div class="fact"><dt>Test set</dt><dd>{{ dataset.file }}, {{ dataset.cases }} cases{% if dataset.cases != dataset.total_cases %} of {{ dataset.total_cases }}{% endif %}{% if dataset.meta.synthetic %} (synthetic){% endif %}</dd></div>
+      <div class="fact"><dt>Matrix</dt><dd>{{ summary.prompts | length }} prompts × {{ summary.models | length }} models × {{ dataset.cases }} cases = {{ totals.cases }} cells</dd></div>
+      <div class="fact"><dt>Cells</dt><dd>{{ totals.passed }} passed, {{ totals.failed }} failed{% if totals.errors %} ({{ totals.errors }} call errors){% endif %}</dd></div>
+      <div class="fact"><dt>Calls</dt><dd>{{ calls_made }} made, {{ totals.cached }} from cache</dd></div>
+      <div class="fact"><dt>Tokens in / out</dt><dd>{{ tokens }}</dd></div>
+      <div class="fact"><dt>Estimated cost</dt><dd>{{ totals.cost_usd | cost }} (spent this run: {{ totals.cost_usd_spent | cost }})</dd></div>
+      {% if totals.judge %}
+      <div class="fact"><dt>Judge calls</dt><dd>{{ totals.judge.calls }} ({{ totals.judge.cached_calls }} cached), est. cost {{ totals.judge.cost_usd | cost }}</dd></div>
+      {% endif %}
+    </dl>
+    {% if dataset.meta.description %}<p class="warning"><span class="muted">Test set:</span> {{ dataset.meta.description }}</p>{% endif %}
+    {% if summary.filters %}<p class="warning">Partial run: narrowed with --prompt, --model or --limit.</p>{% endif %}
+    {% for warning in summary.warnings %}<p class="warning"><strong>Warning:</strong> {{ warning }}</p>{% endfor %}
+  </section>
+
+  <section aria-labelledby="h-chart">
+    <h2 id="h-chart">Pass rate by prompt and model</h2>
+    <p class="note">A case passes when every required scorer passes. The table below the chart has the same numbers.</p>
+    {% if legend | length > 1 %}
+    <div class="legend" aria-label="Models">
+      {% for item in legend %}<span><span class="key s{{ item.series }}"></span>{{ item.id }}</span>{% endfor %}
+    </div>
+    {% endif %}
+    <div class="chart{% if legend | length == 1 %} single{% endif %}">
+      {% for group in chart %}
+      <div class="cgroup">
+        <div class="cgroup-label">{{ group.prompt_id }}</div>
+        <div>
+          {% for bar in group.bars %}
+          <div class="crow">
+            <div class="cmodel">{{ bar.model_id }}</div>
+            <div class="ctrack" tabindex="0" data-tip="{{ bar.tip }}" aria-label="{{ group.prompt_id }}, {{ bar.model_id }}: {{ bar.label }} pass rate, {{ bar.detail }} cases">
+              <div class="cbar s{{ bar.series }}" style="width: {{ bar.pct }}%"></div>
+              <span class="cval" style="left: {{ bar.pct }}%">{{ bar.label }} <span class="muted">{{ bar.detail }}</span></span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+      <div class="caxis" aria-hidden="true">
+        <div></div>
+        <div class="cticks">
+          {% for tick in (0, 25, 50, 75, 100) %}<span style="left: {{ tick }}%">{{ tick }}%</span>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll" style="margin-top: 18px">
+      <table>
+        <thead><tr>
+          <th>Prompt</th><th>Model</th><th class="num">Pass rate</th><th class="num">Passed</th><th class="num">Mean score</th>
+          <th class="num">Errors</th><th class="num">p50 latency</th><th class="num">p95 latency</th><th class="num">Tokens in / out</th><th class="num">Est. cost</th>
+        </tr></thead>
+        <tbody>
+          {% for g in groups %}
+          <tr>
+            <td class="mono">{{ g.prompt_id }}</td>
+            <td class="mono"><span class="key s{{ g.series }}"></span>{{ g.model_id }}</td>
+            <td class="num">{{ g.pass_rate | rate }}</td>
+            <td class="num">{{ g.passed }}/{{ g.cases }}</td>
+            <td class="num">{{ "%.3f" | format(g.mean_score) }}</td>
+            <td class="num">{{ g.errors }}</td>
+            <td class="num">{{ g.latency_ms_p50 | ms }}</td>
+            <td class="num">{{ g.latency_ms_p95 | ms }}</td>
+            <td class="num">{{ g.tokens }}</td>
+            <td class="num">{{ g.cost_usd | cost }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {% if scorer_names %}
+  <section aria-labelledby="h-scorers">
+    <h2 id="h-scorers">Pass rate by scorer</h2>
+    <p class="note">Which check each prompt fails. A prompt can produce the right content and still fail on format.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Prompt</th><th>Model</th>{% for name in scorer_names %}<th class="num">{{ name }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for row in scorer_rows %}
+          <tr>
+            <td class="mono">{{ row.prompt_id }}</td><td class="mono">{{ row.model_id }}</td>
+            {% for cell in row.cells %}
+            <td class="num">{% if cell %}{{ cell.pass_rate | rate }} <span class="muted">{{ cell.passed }}/{{ cell.cases }}</span>
+              <span class="meter"><i style="width: {{ (cell.pass_rate * 100) | round(1) }}%"></i></span>{% else %}<span class="muted">n/a</span>{% endif %}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+
+  <section aria-labelledby="h-grid">
+    <h2 id="h-grid">Side by side</h2>
+    <p class="note">One row per test case, one column per variant. Click a row to see the input, the expected answer, each output and why it passed or failed.</p>
+    <div class="controls" id="controls"></div>
+    <div class="scroll"><table id="grid"><thead></thead><tbody></tbody></table></div>
+    <noscript><p class="empty">The grid and drill-down need JavaScript. The tables above do not.</p></noscript>
+  </section>
+
+  <section aria-labelledby="h-worst">
+    <h2 id="h-worst">Worst failures</h2>
+    {% if not worst %}
+    <p class="empty">No failures in this run.</p>
+    {% else %}
+    <div class="two" style="margin-top: 10px">
+      <div>
+        <p class="note">Cases that fail under the most variants. These are the ones a better prompt has not fixed.</p>
+        <table>
+          <thead><tr><th>Case</th><th class="num">Failed</th><th class="num">Mean score</th></tr></thead>
+          <tbody>
+            {% for case in hardest %}
+            <tr><td><button class="jump" data-case="{{ case.case_id }}">{{ case.case_id }}</button></td>
+              <td class="num">{{ case.failed }}/{{ case.cells }}</td><td class="num">{{ "%.2f" | format(case.mean_score) }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p class="note">Lowest-scoring cells, with the reason from each scorer that failed.</p>
+        <table>
+          <thead><tr><th>Case, variant</th><th class="num">Score</th><th>Why</th></tr></thead>
+          <tbody>
+            {% for failure in worst %}
+            <tr>
+              <td><button class="jump" data-case="{{ failure.case_id }}" data-prompt="{{ failure.prompt_id }}" data-model="{{ failure.model_id }}">{{ failure.case_id }}</button>
+                <div class="muted mono">{{ failure.prompt_id }} · {{ failure.model_id }}</div></td>
+              <td class="num">{{ "%.2f" | format(failure.score) }}</td>
+              <td class="why">{% for reason in failure.reasons %}<div>{{ reason }}</div>{% endfor %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="h-prompts">
+    <h2 id="h-prompts">Prompts</h2>
+    <p class="note">The templates exactly as they were run. <code>{name}</code> is filled from each test case.</p>
+    {% for prompt in prompts %}
+    <details>
+      <summary class="mono">{{ prompt.id }}</summary>
+      {% if prompt.system %}<div class="box" style="margin-top: 8px"><div class="label" style="margin-top: 0">System</div><pre>{{ prompt.system }}</pre></div>{% endif %}
+      <div class="box" style="margin-top: 8px"><div class="label" style="margin-top: 0">Template</div><pre>{{ prompt.template }}</pre></div>
+    </details>
+    {% endfor %}
+  </section>
+
+  <footer>
+    Generated by prompt-lab {{ version }} at {{ generated_at | replace("+00:00", "Z") }} from {{ summary.run_id }}.
+    Costs are estimates from reported token counts and the price table used for this run; n/a means one of them was missing.
+  </footer>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script id="pl-data" type="application/json">{{ data_json | safe }}</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("pl-data").textContent);
+  var byCell = {};
+  DATA.rows.forEach(function (r) { byCell[r.case_id + "\u0001" + r.prompt_id + "\u0001" + r.model_id] = r; });
+
+  // Everything from a model or a test set goes in as text, never as HTML.
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined && text !== null) node.textContent = text;
+    return node;
+  }
+  function show(value) { return typeof value === "string" ? value : JSON.stringify(value, null, 2); }
+  function fmtMs(v) { return v === null || v === undefined ? "n/a" : (v < 10 ? v.toFixed(1) : v.toFixed(0)) + " ms"; }
+
+  // --- chart tooltip: the same details on hover and on keyboard focus ---
+  var tip = document.getElementById("tip");
+  function showTip(target, x, y) {
+    var info = JSON.parse(target.getAttribute("data-tip"));
+    tip.textContent = "";
+    tip.appendChild(el("strong", null, info.value));
+    tip.appendChild(el("div", null, info.detail));
+    var who = el("div", "muted");
+    var line = el("span", "line s" + info.series);
+    who.appendChild(line);
+    who.appendChild(document.createTextNode(info.prompt + " · " + info.model));
+    tip.appendChild(who);
+    tip.style.display = "block";
+    var box = tip.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(x + 14, window.innerWidth - box.width - 8)) + "px";
+    tip.style.top = Math.max(8, Math.min(y + 14, window.innerHeight - box.height - 8)) + "px";
+  }
+  document.querySelectorAll("[data-tip]").forEach(function (target) {
+    target.addEventListener("pointermove", function (e) { showTip(target, e.clientX, e.clientY); });
+    target.addEventListener("pointerleave", function () { tip.style.display = "none"; });
+    target.addEventListener("focus", function () {
+      var box = target.getBoundingClientRect();
+      showTip(target, box.left + 20, box.bottom - 10);
+    });
+    target.addEventListener("blur", function () { tip.style.display = "none"; });
+  });
+
+  // --- side-by-side grid ---
+  var state = {
+    axis: "prompt",                 // what the columns are: prompts or models
+    model: DATA.models[0], prompt: DATA.prompts[0],
+    failedOnly: false, tag: "", query: "", open: {}
+  };
+  var controls = document.getElementById("controls");
+  var table = document.getElementById("grid");
+  var thead = table.querySelector("thead"), tbody = table.querySelector("tbody");
+  var allTags = [];
+  DATA.cases.forEach(function (c) { c.tags.forEach(function (t) { if (allTags.indexOf(t) < 0) allTags.push(t); }); });
+  allTags.sort();
+
+  function columns() { return state.axis === "prompt" ? DATA.prompts : DATA.models; }
+  function cellFor(caseId, column) {
+    var prompt = state.axis === "prompt" ? column : state.prompt;
+    var model = state.axis === "prompt" ? state.model : column;
+    return byCell[caseId + "\u0001" + prompt + "\u0001" + model];
+  }
+  function verdict(row) {
+    var wrap = el("span", "verdict");
+    if (!row) { wrap.appendChild(el("span", "muted", "not run")); return wrap; }
+    var kind = row.status === "error" ? "err" : row.passed ? "pass" : "fail";
+    var dot = el("span", "dot " + kind, kind === "pass" ? "✓" : kind === "fail" ? "✕" : "!");
+    dot.setAttribute("aria-hidden", "true");
+    wrap.appendChild(dot);
+    wrap.appendChild(document.createTextNode(
+      kind === "err" ? "error" : (kind === "pass" ? "pass " : "fail ") + row.score.toFixed(2)));
+    return wrap;
+  }
+  function segmented(label, options, current, onPick) {
+    var holder = el("label", null, label);
+    var seg = el("span", "seg");
+    options.forEach(function (option) {
+      var button = el("button", null, option.text);
+      button.type = "button";
+      button.setAttribute("aria-pressed", String(option.value === current));
+      button.addEventListener("click", function () { onPick(option.value); render(); });
+      seg.appendChild(button);
+    });
+    holder.appendChild(seg);
+    return holder;
+  }
+  function picker(label, values, current, onPick, anyText) {
+    var holder = el("label", null, label);
+    var select = el("select");
+    if (anyText) { var any = el("option", null, anyText); any.value = ""; select.appendChild(any); }
+    values.forEach(function (value) {
+      var option = el("option", null, value); option.value = value; select.appendChild(option);
+    });
+    select.value = current;
+    select.addEventListener("change", function () { onPick(select.value); render(); });
+    holder.appendChild(select);
+    return holder;
+  }
+
+  function renderControls() {
+    controls.textContent = "";
+    if (DATA.models.length > 1 && DATA.prompts.length > 1) {
+      controls.appendChild(segmented("Columns", [
+        { value: "prompt", text: "Prompts" }, { value: "model", text: "Models" }
+      ], state.axis, function (v) { state.axis = v; }));
+    }
+    if (state.axis === "prompt" && DATA.models.length > 1) {
+      controls.appendChild(picker("Model", DATA.models, state.model, function (v) { state.model = v; }));
+    }
+    if (state.axis === "model" && DATA.prompts.length > 1) {
+      controls.appendChild(picker("Prompt", DATA.prompts, state.prompt, function (v) { state.prompt = v; }));
+    }
+    var failed = el("label");
+    var box = el("input"); box.type = "checkbox"; box.checked = state.failedOnly;
+    box.addEventListener("change", function () { state.failedOnly = box.checked; render(); });
+    failed.appendChild(box); failed.appendChild(document.createTextNode("Only cases with a failure"));
+    controls.appendChild(failed);
+    if (allTags.length) {
+      controls.appendChild(picker("Tag", allTags, state.tag, function (v) { state.tag = v; }, "all"));
+    }
+    var search = el("input"); search.type = "search"; search.placeholder = "Search case id or input";
+    search.value = state.query; search.setAttribute("aria-label", "Search cases");
+    search.addEventListener("input", function () {
+      state.query = search.value; renderRows();
+    });
+    controls.appendChild(search);
+    var count = el("span", "count", ""); count.id = "count";
+    controls.appendChild(count);
+  }
+
+  function preview(c) {
+    var keys = Object.keys(c.vars);
+    var text = keys.length ? show(c.vars[keys[0]]) : "";
+    return text.length > 110 ? text.slice(0, 107) + "..." : text;
+  }
+  function visibleCases() {
+    var q = state.query.trim().toLowerCase();
+    return DATA.cases.filter(function (c) {
+      if (state.tag && c.tags.indexOf(state.tag) < 0) return false;
+      if (q && (c.id + " " + JSON.stringify(c.vars)).toLowerCase().indexOf(q) < 0) return false;
+      if (state.failedOnly) {
+        return columns().some(function (col) { var r = cellFor(c.id, col); return r && !r.passed; });
+      }
+      return true;
+    });
+  }
+
+  function detail(c) {
+    var wrap = el("div");
+    var io = el("div", "case-io");
+    var input = el("div", "box");
+    input.appendChild(el("h3", null, "Input"));
+    Object.keys(c.vars).forEach(function (name) {
+      input.appendChild(el("div", "label", name));
+      input.appendChild(el("pre", null, show(c.vars[name])));
+    });
+    io.appendChild(input);
+    var expected = el("div", "box");
+    expected.appendChild(el("h3", null, "Expected"));
+    expected.appendChild(el("pre", null, c.expected === null || c.expected === undefined
+      ? "(none: this case is scored by checks only)" : show(c.expected)));
+    io.appendChild(expected);
+    wrap.appendChild(io);
+
+    var variants = el("div", "variants");
+    columns().forEach(function (column) {
+      var row = cellFor(c.id, column);
+      var box = el("div", "box");
+      var head = el("h3");
+      head.appendChild(el("span", "mono", column));
+      head.appendChild(verdict(row));
+      box.appendChild(head);
+      if (!row) { variants.appendChild(box); return; }
+      var meta = [fmtMs(row.latency_ms)];
+      if (row.usage) meta.push(row.usage.prompt_tokens + " in / " + row.usage.completion_tokens + " out tokens");
+      if (row.cached) meta.push("from cache");
+      if (row.attempts > 1) meta.push(row.attempts + " attempts");
+      if (row.finish_reason === "length") meta.push("cut off at max_tokens");
+      box.appendChild(el("div", "muted", meta.join(" · ")));
+      if (row.status === "error") {
+        box.appendChild(el("div", "label", "Call error"));
+        box.appendChild(el("pre", null, row.error.type + ": " + row.error.message));
+      } else {
+        box.appendChild(el("div", "label", "Output"));
+        box.appendChild(el("pre", null, row.output === "" ? "(empty output)" : row.output));
+        box.appendChild(el("div", "label", "Scores"));
+        var list = el("ul", "reasons");
+        row.scores.forEach(function (s) {
+          var item = el("li");
+          var kind = s.error ? "err" : s.passed ? "pass" : "fail";
+          var dot = el("span", "dot " + kind, kind === "pass" ? "✓" : kind === "fail" ? "✕" : "!");
+          dot.setAttribute("aria-label", kind === "pass" ? "passed" : kind === "fail" ? "failed" : "scorer error");
+          item.appendChild(dot);
+          var text = el("span");
+          text.appendChild(el("b", null, s.scorer + (s.required ? "" : " (advisory)")));
+          text.appendChild(document.createTextNode(" " + s.reason));
+          item.appendChild(text);
+          list.appendChild(item);
+        });
+        box.appendChild(list);
+      }
+      variants.appendChild(box);
+    });
+    wrap.appendChild(variants);
+    return wrap;
+  }
+
+  function renderRows() {
+    var cols = columns();
+    var cases = visibleCases();
+    tbody.textContent = "";
+    cases.forEach(function (c) {
+      var open = !!state.open[c.id];
+      var tr = el("tr", "case" + (open ? " open" : ""));
+      tr.id = "case-" + c.id;
+      tr.tabIndex = 0;
+      tr.setAttribute("aria-expanded", String(open));
+      var first = el("td", "mono");
+      first.appendChild(el("span", "caret", open ? "▾" : "▸"));
+      first.appendChild(document.createTextNode(c.id));
+      c.tags.forEach(function (t) { first.appendChild(document.createTextNode(" ")); first.appendChild(el("span", "tag", t)); });
+      tr.appendChild(first);
+      tr.appendChild(el("td", "preview", preview(c)));
+      cols.forEach(function (col) { var td = el("td"); td.appendChild(verdict(cellFor(c.id, col))); tr.appendChild(td); });
+      function toggle() { state.open[c.id] = !state.open[c.id]; renderRows(); }
+      tr.addEventListener("click", toggle);
+      tr.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); document.getElementById("case-" + c.id).focus(); }
+      });
+      tbody.appendChild(tr);
+      if (open) {
+        var dr = el("tr", "detail");
+        var td = el("td"); td.colSpan = cols.length + 2;
+        td.appendChild(detail(c));
+        dr.appendChild(td);
+        tbody.appendChild(dr);
+      }
+    });
+    if (!cases.length) {
+      var tr = el("tr"); var td = el("td", "empty", "No cases match these filters."); td.colSpan = cols.length + 2;
+      tr.appendChild(td); tbody.appendChild(tr);
+    }
+    var count = document.getElementById("count");
+    if (count) count.textContent = cases.length + " of " + DATA.cases.length + " cases";
+  }
+
+  function render() {
+    renderControls();
+    thead.textContent = "";
+    var tr = el("tr");
+    tr.appendChild(el("th", null, "Case"));
+    tr.appendChild(el("th", null, "Input"));
+    columns().forEach(function (col) { tr.appendChild(el("th", "mono", col)); });
+    thead.appendChild(tr);
+    renderRows();
+  }
+
+  // "Worst failures" entries open the case in the grid.
+  document.querySelectorAll(".jump").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var id = button.getAttribute("data-case");
+      state.failedOnly = false; state.tag = ""; state.query = "";
+      if (button.getAttribute("data-model")) {
+        state.axis = "prompt"; state.model = button.getAttribute("data-model");
+      }
+      state.open[id] = true;
+      render();
+      var row = document.getElementById("case-" + id);
+      if (row) { row.scrollIntoView({ block: "start", behavior: "smooth" }); row.focus({ preventScroll: true }); }
+    });
+  });
+
+  // A link ending in #case-<id> opens that case's drill-down.
+  var linked = decodeURIComponent(window.location.hash.replace(/^#case-/, ""));
+  if (window.location.hash.indexOf("#case-") === 0 && DATA.cases.some(function (c) { return c.id === linked; })) {
+    state.open[linked] = true;
+  }
+  render();
+  if (state.open[linked]) {
+    var target = document.getElementById("case-" + linked);
+    if (target) target.scrollIntoView({ block: "start" });
+  }
+})();
+</script>
+</body>
+</html>
