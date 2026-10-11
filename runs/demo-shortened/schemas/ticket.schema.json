@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Support ticket fields",
+  "type": "object",
+  "required": ["order_id", "category", "refund_amount", "sentiment"],
+  "additionalProperties": false,
+  "properties": {
+    "order_id": { "type": ["string", "null"], "pattern": "^ORD-[0-9]{5}$" },
+    "category": { "enum": ["refund", "shipping", "billing", "technical", "account"] },
+    "refund_amount": { "type": ["number", "null"], "minimum": 0 },
+    "sentiment": { "enum": ["negative", "neutral", "positive"] }
+  }
+}

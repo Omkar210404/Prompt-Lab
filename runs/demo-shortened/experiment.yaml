@@ -1,0 +1,166 @@
+# Snapshot of the experiment as it was run. Run: demo-shortened. Config hash: dbf66df07a4db8aa3f4e4eb5b541589e8e8421cd2c068711304c2525b874dbc9
+# Source file: support_extraction_shortened.yaml
+name: support-email-extraction
+description: Extract order id, category, refund amount and sentiment from a support email as JSON. Mock
+  demo.
+dataset: dataset.jsonl
+prompts:
+- id: v1_bare
+  template: |
+    Extract the order id, category, refund amount and sentiment from this support email.
+
+    {email}
+- id: v2_json_rules
+  template: |
+    Extract fields from the support email below.
+
+    Respond with only a JSON object and no other text, with exactly these keys:
+    - "order_id": the order number, such as "ORD-12345"
+    - "category": one of "refund", "shipping", "billing", "technical", "account"
+    - "refund_amount": the amount the customer wants refunded
+    - "sentiment": one of "negative", "neutral", "positive"
+
+    Email:
+    {email}
+- id: v3_fewshot
+  template: |
+    Extract fields from the support email below.
+
+    Respond with only a JSON object and no other text, with exactly these keys:
+    - "order_id": the order number, such as "ORD-12345"
+    - "category": one of "refund", "shipping", "billing", "technical", "account"
+    - "refund_amount": the amount the customer wants refunded
+    - "sentiment": one of "negative", "neutral", "positive"
+
+    Rules:
+    - If the email has no order number, use null for order_id.
+    - If several order numbers appear, use the one the request is about.
+    - If no refund is requested, use null for refund_amount.
+    - Use "neutral" when the tone is mixed or the email is a purely factual request.
+
+    Email:
+    {email}
+models:
+- id: mock-careful
+  provider: mock
+  model: mock-careful
+  mock:
+    latency_ms: 30
+    latency_jitter_ms: 30
+    rules:
+    - name: misses-sarcasm
+      when:
+        tags:
+        - sarcasm
+      behave: wrong_field
+      set:
+        sentiment: positive
+    - name: chatty-without-json-only
+      when:
+        prompt_lacks: only a JSON object
+        rate: 0.4
+      behave: prose_wrapped
+    - name: keeps-currency-symbol
+      when:
+        prompt_lacks: plain number
+        tags:
+        - amount_with_currency
+      behave: number_as_string
+      field: refund_amount
+    - name: picks-first-order-id-010
+      when:
+        prompt_lacks: several order numbers
+        case_ids:
+        - email-010
+      behave: wrong_field
+      set:
+        order_id: ORD-21990
+    - name: picks-first-order-id-017
+      when:
+        prompt_lacks: several order numbers
+        case_ids:
+        - email-017
+      behave: wrong_field
+      set:
+        order_id: ORD-55310
+    - name: mixed-tone-read-as-negative
+      when:
+        prompt_lacks: tone is mixed
+        tags:
+        - mixed_sentiment
+      behave: wrong_field
+      set:
+        sentiment: negative
+- id: mock-sloppy
+  provider: mock
+  model: mock-sloppy
+  mock:
+    latency_ms: 10
+    latency_jitter_ms: 15
+    rules:
+    - name: truncated-output
+      when:
+        rate: 0.08
+      behave: invalid_json
+    - name: misses-sarcasm
+      when:
+        tags:
+        - sarcasm
+      behave: wrong_field
+      set:
+        sentiment: positive
+    - name: chatty-without-json-only
+      when:
+        prompt_lacks: only a JSON object
+      behave: prose_wrapped
+    - name: invents-an-order-id
+      when:
+        prompt_lacks: use null for order_id
+        tags:
+        - no_order_id
+      behave: wrong_field
+      set:
+        order_id: UNKNOWN
+    - name: keeps-currency-symbol
+      when:
+        prompt_lacks: plain number
+        tags:
+        - amount_with_currency
+      behave: number_as_string
+      field: refund_amount
+    - name: picks-first-order-id-010
+      when:
+        prompt_lacks: several order numbers
+        case_ids:
+        - email-010
+      behave: wrong_field
+      set:
+        order_id: ORD-21990
+    - name: picks-first-order-id-017
+      when:
+        case_ids:
+        - email-017
+      behave: wrong_field
+      set:
+        order_id: ORD-55310
+    - name: mixed-tone-read-as-negative
+      when:
+        prompt_lacks: tone is mixed
+        tags:
+        - mixed_sentiment
+      behave: wrong_field
+      set:
+        sentiment: negative
+scorers:
+- type: json_valid
+- type: json_schema
+  schema_file: schemas/ticket.schema.json
+- type: json_fields
+  fields:
+  - order_id
+  - category
+  - sentiment
+- type: numeric
+  field: refund_amount
+  abs_tol: 0.01
+prices_file: prices.yaml

@@ -1,0 +1,22 @@
+# Price table for the demo: USD per 1 million tokens, keyed by model name.
+#
+# The two mock entries are FICTIONAL. They exist so the demo can show the cost column.
+# prompt-lab ships no real provider prices, because they change. For a real model, copy the
+# current numbers from the provider's pricing page and note where and when you read them.
+# A model with no entry here gets a cost of "n/a" in reports, never $0.
+
+mock-careful:
+  input: 0.50
+  output: 1.50
+  note: Fictional price for the demo.
+
+mock-sloppy:
+  input: 0.05
+  output: 0.10
+  note: Fictional price for the demo.
+
+# your-model-name:
+#   input: 0.00
+#   output: 0.00
+#   source: <pricing page URL>
+#   checked: <date you read it>

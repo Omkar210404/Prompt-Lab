@@ -1,0 +1,402 @@
+{
+  "run_id": "demo",
+  "experiment": "support-email-extraction",
+  "description": "Extract order id, category, refund amount and sentiment from a support email as JSON. Mock demo.",
+  "config_hash": "456e608d37aab115981c3f14e275b0c386b489d87f640e802c9e19cf8e1ecc10",
+  "started_at": "2026-10-11T14:09:01+00:00",
+  "finished_at": "2026-10-11T14:09:03+00:00",
+  "duration_seconds": 1.967,
+  "promptlab_version": "0.1.0",
+  "python_version": "3.11.9",
+  "dataset": {
+    "file": "support_emails.jsonl",
+    "sha256": "f71ca9739b918c99baee6811e351a836415558707e4a047c063c367707dd5a68",
+    "cases": 24,
+    "total_cases": 24,
+    "meta": {
+      "synthetic": true,
+      "description": "24 short support emails written by hand for this demo. They are invented: no real customers, orders or companies. Tags mark the harder cases."
+    }
+  },
+  "prompts": [
+    "v1_bare",
+    "v2_json_rules",
+    "v3_fewshot"
+  ],
+  "models": [
+    {
+      "id": "mock-careful",
+      "provider": "mock",
+      "model": "mock-careful"
+    },
+    {
+      "id": "mock-sloppy",
+      "provider": "mock",
+      "model": "mock-sloppy"
+    }
+  ],
+  "judges": [],
+  "mock_models": [
+    "mock-careful",
+    "mock-sloppy"
+  ],
+  "filters": null,
+  "warnings": [],
+  "prices": {
+    "mock-careful": {
+      "input": 0.5,
+      "output": 1.5,
+      "note": "Fictional price for the demo."
+    },
+    "mock-sloppy": {
+      "input": 0.05,
+      "output": 0.1,
+      "note": "Fictional price for the demo."
+    }
+  },
+  "totals": {
+    "cases": 144,
+    "passed": 72,
+    "failed": 72,
+    "pass_rate": 0.5,
+    "mean_score": 0.6481,
+    "errors": 0,
+    "scorer_errors": 0,
+    "cached": 0,
+    "latency_ms_p50": 33.39,
+    "latency_ms_p95": 64.13,
+    "prompt_tokens": 14028,
+    "completion_tokens": 1678,
+    "cost_usd": 0.0051231,
+    "cost_usd_spent": 0.0051231,
+    "judge": null
+  },
+  "groups": [
+    {
+      "prompt_id": "v1_bare",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 8,
+      "failed": 16,
+      "pass_rate": 0.3333,
+      "mean_score": 0.4132,
+      "errors": 0,
+      "scorer_errors": 0,
+      "cached": 0,
+      "latency_ms_p50": 48.45,
+      "latency_ms_p95": 64.12,
+      "prompt_tokens": 770,
+      "completion_tokens": 400,
+      "cost_usd": 0.000985,
+      "cost_usd_spent": 0.000985
+    },
+    {
+      "prompt_id": "v1_bare",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 0,
+      "failed": 24,
+      "pass_rate": 0.0,
+      "mean_score": 0.0382,
+      "errors": 0,
+      "scorer_errors": 0,
+      "cached": 0,
+      "latency_ms_p50": 18.04,
+      "latency_ms_p95": 33.65,
+      "prompt_tokens": 770,
+      "completion_tokens": 522,
+      "cost_usd": 9.07e-05,
+      "cost_usd_spent": 9.07e-05
+    },
+    {
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 14,
+      "failed": 10,
+      "pass_rate": 0.5833,
+      "mean_score": 0.8438,
+      "errors": 0,
+      "scorer_errors": 0,
+      "cached": 0,
+      "latency_ms_p50": 47.66,
+      "latency_ms_p95": 62.1,
+      "prompt_tokens": 1754,
+      "completion_tokens": 192,
+      "cost_usd": 0.001165,
+      "cost_usd_spent": 0.001165
+    },
+    {
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 7,
+      "failed": 17,
+      "pass_rate": 0.2917,
+      "mean_score": 0.6875,
+      "errors": 0,
+      "scorer_errors": 0,
+      "cached": 0,
+      "latency_ms_p50": 16.71,
+      "latency_ms_p95": 33.64,
+      "prompt_tokens": 1754,
+      "completion_tokens": 186,
+      "cost_usd": 0.0001063,
+      "cost_usd_spent": 0.0001063
+    },
+    {
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 23,
+      "failed": 1,
+      "pass_rate": 0.9583,
+      "mean_score": 0.9965,
+      "errors": 0,
+      "scorer_errors": 0,
+      "cached": 0,
+      "latency_ms_p50": 48.3,
+      "latency_ms_p95": 67.24,
+      "prompt_tokens": 4490,
+      "completion_tokens": 192,
+      "cost_usd": 0.002533,
+      "cost_usd_spent": 0.002533
+    },
+    {
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 20,
+      "failed": 4,
+      "pass_rate": 0.8333,
+      "mean_score": 0.9097,
+      "errors": 0,
+      "scorer_errors": 0,
+      "cached": 0,
+      "latency_ms_p50": 17.84,
+      "latency_ms_p95": 32.61,
+      "prompt_tokens": 4490,
+      "completion_tokens": 186,
+      "cost_usd": 0.0002431,
+      "cost_usd_spent": 0.0002431
+    }
+  ],
+  "scorers": [
+    {
+      "scorer": "json_valid",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 11,
+      "pass_rate": 0.4583,
+      "errors": 0
+    },
+    {
+      "scorer": "json_schema",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 9,
+      "pass_rate": 0.375,
+      "errors": 0
+    },
+    {
+      "scorer": "json_fields",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 10,
+      "pass_rate": 0.4167,
+      "errors": 0
+    },
+    {
+      "scorer": "numeric",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 9,
+      "pass_rate": 0.375,
+      "errors": 0
+    },
+    {
+      "scorer": "json_valid",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 1,
+      "pass_rate": 0.0417,
+      "errors": 0
+    },
+    {
+      "scorer": "json_schema",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 1,
+      "pass_rate": 0.0417,
+      "errors": 0
+    },
+    {
+      "scorer": "json_fields",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "errors": 0
+    },
+    {
+      "scorer": "numeric",
+      "prompt_id": "v1_bare",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 1,
+      "pass_rate": 0.0417,
+      "errors": 0
+    },
+    {
+      "scorer": "json_valid",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 24,
+      "pass_rate": 1.0,
+      "errors": 0
+    },
+    {
+      "scorer": "json_schema",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 17,
+      "pass_rate": 0.7083,
+      "errors": 0
+    },
+    {
+      "scorer": "json_fields",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 21,
+      "pass_rate": 0.875,
+      "errors": 0
+    },
+    {
+      "scorer": "numeric",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 17,
+      "pass_rate": 0.7083,
+      "errors": 0
+    },
+    {
+      "scorer": "json_valid",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 22,
+      "pass_rate": 0.9167,
+      "errors": 0
+    },
+    {
+      "scorer": "json_schema",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 9,
+      "pass_rate": 0.375,
+      "errors": 0
+    },
+    {
+      "scorer": "json_fields",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 13,
+      "pass_rate": 0.5417,
+      "errors": 0
+    },
+    {
+      "scorer": "numeric",
+      "prompt_id": "v2_json_rules",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 16,
+      "pass_rate": 0.6667,
+      "errors": 0
+    },
+    {
+      "scorer": "json_valid",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 24,
+      "pass_rate": 1.0,
+      "errors": 0
+    },
+    {
+      "scorer": "json_schema",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 24,
+      "pass_rate": 1.0,
+      "errors": 0
+    },
+    {
+      "scorer": "json_fields",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 23,
+      "pass_rate": 0.9583,
+      "errors": 0
+    },
+    {
+      "scorer": "numeric",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-careful",
+      "cases": 24,
+      "passed": 24,
+      "pass_rate": 1.0,
+      "errors": 0
+    },
+    {
+      "scorer": "json_valid",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 22,
+      "pass_rate": 0.9167,
+      "errors": 0
+    },
+    {
+      "scorer": "json_schema",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 22,
+      "pass_rate": 0.9167,
+      "errors": 0
+    },
+    {
+      "scorer": "json_fields",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 20,
+      "pass_rate": 0.8333,
+      "errors": 0
+    },
+    {
+      "scorer": "numeric",
+      "prompt_id": "v3_fewshot",
+      "model_id": "mock-sloppy",
+      "cases": 24,
+      "passed": 22,
+      "pass_rate": 0.9167,
+      "errors": 0
+    }
+  ]
+}
