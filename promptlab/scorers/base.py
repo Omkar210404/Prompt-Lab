@@ -166,7 +166,8 @@ def output_target(output: str, field: str | None, allow_fenced: bool = False) ->
         return output, None
     data, problem = parse_json(output, allow_fenced)
     if problem:
-        return MISSING, failed(f"cannot read field '{field}': output is {problem}")
+        # json_valid, if configured, reports the parse error in full; here a short reason is enough.
+        return MISSING, failed(f"cannot read field '{field}': output is not valid JSON")
     value = get_field(data, field)
     if value is MISSING:
         return MISSING, failed(f"field '{field}' is missing from the output")

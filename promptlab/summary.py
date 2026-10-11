@@ -68,6 +68,56 @@ def _judge_totals(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     }
 
 
+def failure_reasons(row: dict[str, Any]) -> list[str]:
+    """Why a cell failed: the provider error, or the reason from each scorer that did not pass."""
+    if row["status"] == "error":
+        error = row.get("error") or {}
+        return [f"{error.get('type', 'error')}: {error.get('message', '')}"]
+    return [f"{s['scorer']}: {s['reason']}" for s in row.get("scores", []) if not s["passed"]]
+
+
+def worst_failures(rows: list[dict[str, Any]], limit: int = 10) -> list[dict[str, Any]]:
+    """Failing cells, lowest score first.
+
+    Ties go to the prompt x model with the higher pass rate: a zero from a variant that usually
+    passes says more than one of many zeros from a variant that fails everything.
+    """
+    members: dict[tuple[str, str], list[bool]] = {}
+    for r in rows:
+        members.setdefault((r["prompt_id"], r["model_id"]), []).append(r["passed"])
+    pass_rate = {key: sum(values) / len(values) for key, values in members.items()}
+    failing = sorted(
+        (r for r in rows if not r["passed"]),
+        key=lambda r: (r["score"], -pass_rate[(r["prompt_id"], r["model_id"])],
+                       r["case_id"], r["prompt_id"], r["model_id"]),
+    )
+    return [
+        {
+            "case_id": r["case_id"], "prompt_id": r["prompt_id"], "model_id": r["model_id"],
+            "score": round(r["score"], 4), "status": r["status"], "reasons": failure_reasons(r),
+        }
+        for r in failing[:limit]
+    ]
+
+
+def hardest_cases(rows: list[dict[str, Any]], limit: int = 10) -> list[dict[str, Any]]:
+    """Test cases that fail under the most prompt x model combinations."""
+    by_case: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_case.setdefault(row["case_id"], []).append(row)
+    cases = [
+        {
+            "case_id": case_id,
+            "cells": len(members),
+            "failed": sum(1 for r in members if not r["passed"]),
+            "mean_score": round(sum(r["score"] for r in members) / len(members), 4),
+        }
+        for case_id, members in by_case.items()
+    ]
+    failing = [c for c in cases if c["failed"]]
+    return sorted(failing, key=lambda c: (-c["failed"], c["mean_score"], c["case_id"]))[:limit]
+
+
 def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Totals, one entry per prompt x model, and a pass rate per scorer within each of those."""
     grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}

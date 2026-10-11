@@ -81,7 +81,7 @@ class JsonSchema(Scorer):
     def score(self, output: str, case: TestCase) -> ScoreResult:
         data, problem = parse_json(output, self.allow_fenced)
         if problem:
-            return failed(f"cannot validate: output is {problem}")
+            return failed("cannot validate: output is not valid JSON")
         errors = sorted(self.validator.iter_errors(data), key=lambda e: list(e.absolute_path))
         if not errors:
             return passed("matches schema")
@@ -111,7 +111,7 @@ class JsonFields(Scorer):
             return failed("this case's expected value is not an object")
         data, problem = parse_json(output, self.allow_fenced)
         if problem:
-            return failed(f"cannot compare fields: output is {problem}")
+            return failed("cannot compare fields: output is not valid JSON")
         if not isinstance(data, dict):
             return failed(f"output is JSON but not an object (got {type(data).__name__})")
 

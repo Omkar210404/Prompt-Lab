@@ -136,7 +136,7 @@ class Runner:
         self.prices = prices or {}
         self.options = options or RunOptions()
         self._sleep = sleep
-        self._on_cell = on_cell
+        self.on_cell = on_cell
 
         experiment = loaded.experiment
         self.run_config = experiment.run
@@ -154,8 +154,9 @@ class Runner:
             scorer.judge for scorers in self._scorers.values() for scorer in scorers
             if isinstance(scorer, LLMJudge)
         }
+        self.judge_ids: list[str] = sorted(judge_ids)
         self._configs: dict[str, ModelConfig] = {model.id: model for model in self.models}
-        for judge_id in sorted(judge_ids):
+        for judge_id in self.judge_ids:
             self._configs.setdefault(judge_id, experiment.judge(judge_id))
 
         # `providers` lets tests inject their own. Anything missing is built from the experiment file.
@@ -270,8 +271,8 @@ class Runner:
             result.cost_usd = estimate_cost(response.usage, price_for(self.prices, model))
             await self._score(result, request, case)
 
-        if self._on_cell:
-            self._on_cell(result)
+        if self.on_cell:
+            self.on_cell(result)
         return result
 
     async def _score(self, result: CellResult, request: CompletionRequest, case: TestCase) -> None:

@@ -72,10 +72,11 @@ class Contains(Scorer):
     type = "contains"
 
     def __init__(self, value=None, values=None, mode: str = "all", ignore_case: bool = False,
-                 field: str | None = None):
+                 field: str | None = None, expected_field: str | None = None):
         if mode not in ("all", "any"):
             raise ValueError("`mode` must be 'all' or 'any'")
         self.needles = _needles(value, values)
+        self.expected_field = expected_field
         self.mode = mode
         self.ignore_case = ignore_case
         self.field = field
@@ -83,7 +84,7 @@ class Contains(Scorer):
     def score(self, output: str, case: TestCase) -> ScoreResult:
         needles = self.needles
         if not needles:
-            expected = expected_for(case, None, self.field)
+            expected = expected_for(case, self.expected_field, self.field)
             if expected is None:
                 return failed("no `value` given and no expected value for this case")
             needles = [as_text(expected)]
