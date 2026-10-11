@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>prompt-lab</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #222220; --surface-3: #2a2a28;
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
+  --good: #0ca30c; --warn: #fab219; --bad: #d03b3b; --accent: #3987e5; --accent-ink: #ffffff;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.top {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 24px;
+  padding: 10px 20px; background: rgba(13, 13, 13, 0.92); border-bottom: 1px solid var(--border); backdrop-filter: blur(6px);
+}
+.brand { font-weight: 700; font-size: 16px; letter-spacing: 0.01em; }
+.brand span { color: var(--accent); }
+nav { display: flex; gap: 4px; }
+nav button { background: none; border: 0; color: var(--ink-2); padding: 6px 12px; border-radius: 7px; cursor: pointer; font: inherit; }
+nav button:hover { background: var(--surface-2); }
+nav button[aria-selected="true"] { background: var(--surface-3); color: var(--ink); font-weight: 600; }
+.top .where { margin-left: auto; color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
+main { max-width: 1240px; margin: 0 auto; padding: 22px 16px 80px; }
+h1 { font-size: 22px; margin: 0 0 4px; font-weight: 650; }
+h2 { font-size: 16px; margin: 0 0 4px; font-weight: 650; display: flex; align-items: center; gap: 10px; }
+.step { width: 24px; height: 24px; border-radius: 50%; background: var(--surface-3); color: var(--ink-2); display: inline-grid; place-items: center; font-size: 13px; }
+p { margin: 0; }
+.sub { color: var(--ink-2); }
+.muted { color: var(--muted); }
+.note { color: var(--ink-2); font-size: 13px; margin-bottom: 14px; max-width: 105ch; }
+.mono, code, pre, textarea.code { font-family: var(--mono); font-size: 12.5px; }
+section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-top: 16px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chip { background: var(--surface-3); color: var(--ink-2); border-radius: 999px; padding: 2px 10px; font-size: 12.5px; }
+.banner { margin-top: 14px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--warn); background: rgba(250, 178, 25, 0.10); display: flex; gap: 10px; }
+.banner .icon { color: var(--warn); font-weight: 700; }
+.error { margin-top: 10px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bad); background: rgba(208, 59, 59, 0.12); overflow-wrap: anywhere; }
+label.field { display: block; color: var(--muted); font-size: 12px; margin: 10px 0 4px; }
+input[type="text"], select, textarea {
+  width: 100%; background: var(--surface-2); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 7px; padding: 7px 9px; font: inherit;
+}
+textarea { resize: vertical; line-height: 1.45; }
+select { width: auto; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn { font: inherit; display: inline-block; text-decoration: none; border-radius: 7px; padding: 7px 14px; cursor: pointer; border: 1px solid var(--border); background: var(--surface-3); color: var(--ink); }
+.btn:hover { filter: brightness(1.15); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+.btn.small { padding: 3px 9px; font-size: 12.5px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+a.link, button.linkish { color: var(--accent); text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+a.link:hover, button.linkish:hover { text-decoration: underline; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.card-head { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.card-head input { font-family: var(--mono); font-size: 12.5px; font-weight: 600; }
+.edited { color: var(--warn); font-size: 12px; white-space: nowrap; }
+details.sys { margin-top: 8px; }
+details.sys summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
+.models { display: flex; flex-wrap: wrap; gap: 10px; }
+.model { display: flex; gap: 8px; align-items: flex-start; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; max-width: 420px; }
+.model.off { opacity: 0.65; }
+.model small { display: block; color: var(--muted); }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+
+.results { margin-top: 16px; overflow-x: auto; }
+.model-row { margin-top: 14px; }
+.model-row > .name { color: var(--ink-2); font-size: 13px; margin-bottom: 6px; }
+.variants { display: grid; gap: 12px; grid-auto-flow: column; grid-auto-columns: minmax(290px, 1fr); }
+.box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.box h3 { margin: 0 0 4px; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.box .label { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; margin: 8px 0 3px; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
+.verdict { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dot { width: 18px; height: 18px; flex: none; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; line-height: 1; }
+.dot.pass { background: var(--good); } .dot.fail { background: var(--bad); } .dot.err { background: var(--warn); color: #1a1a19; }
+.reasons { list-style: none; margin: 0; padding: 0; }
+.reasons li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; padding: 3px 0; align-items: start; }
+.reasons .dot { margin-top: 2px; }
+
+.progress { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+.meter { display: block; height: 4px; background: var(--grid); border-radius: 2px; margin-top: 4px; min-width: 110px; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.down { color: #e66767; } .up { color: #0ca30c; }
+.empty { color: var(--muted); padding: 14px 0; }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--axis); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">prompt<span>-lab</span></div>
+  <nav role="tablist">
+    <button role="tab" data-tab="lab">Lab</button>
+    <button role="tab" data-tab="runs">Runs</button>
+    <button role="tab" data-tab="compare">Compare</button>
+  </nav>
+  <div class="where" id="where"></div>
+</div>
+
+<main>
+  <!-- ============ Lab ============ -->
+  <div id="tab-lab">
+    <section>
+      <h1>Test a prompt before you ship it</h1>
+      <p class="sub">Write prompt variants, try them on one input, then run the whole test set and see which variant passes more cases.</p>
+      <label class="field" for="experiment">Experiment</label>
+      <div class="row"><select id="experiment"></select><span class="muted" id="exp-desc"></span></div>
+      <div class="chips" id="exp-chips"></div>
+      <div class="banner" id="mock-banner" hidden>
+        <span class="icon" aria-hidden="true">!</span>
+        <p><strong>Mock models.</strong> The models in this experiment are the scripted mock provider. It does not read your input or generate text: it starts from the expected answer and applies the rules in the experiment file, some of which depend on the wording of your prompt. Results show how prompt-lab works. They are not a benchmark. Add a real model to the experiment file to get real answers.</p>
+      </div>
+      <div class="error" id="exp-error" hidden></div>
+    </section>
+
+    <div id="lab-body">
+    <section>
+      <h2><span class="step">1</span> Prompts</h2>
+      <p class="note">Each card is one variant. Edit the text, rename it, or add another. <code>{name}</code> is filled in from the input below. Edits live in this page only: they are not written to the experiment file, but a run saves the prompts it used.</p>
+      <div class="cards" id="prompts"></div>
+      <div class="row" style="margin-top: 12px">
+        <button class="btn" id="add-prompt">+ Add variant</button>
+        <button class="btn" id="reset-prompts">Reset to file</button>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="step">2</span> Models</h2>
+      <p class="note">Every selected model answers every prompt.</p>
+      <div class="models" id="models"></div>
+    </section>
+
+    <section>
+      <h2><span class="step">3</span> Try one input</h2>
+      <p class="note">Type an input, or load a test case and change it. The expected answer is what the scorers compare against.</p>
+      <div class="two">
+        <div>
+          <label class="field" for="case">Load a test case</label>
+          <select id="case"></select>
+          <div id="vars"></div>
+          <p class="muted" id="mock-hint" style="margin-top: 6px; font-size: 12.5px" hidden>The selected models are mock models. They do not read this text: their answer is built from the expected answer on the right and the mock rules. Select a real model to have your input answered.</p>
+        </div>
+        <div>
+          <label class="field" for="expected">Expected answer (JSON or plain text; leave empty if there is none)</label>
+          <textarea id="expected" class="code" rows="7" spellcheck="false"></textarea>
+          <label class="field" for="tags">Tags (comma separated; the mock rules can depend on them)</label>
+          <input type="text" id="tags">
+        </div>
+      </div>
+      <div class="row" style="margin-top: 14px">
+        <button class="btn primary" id="try">Run this input</button>
+        <span class="muted" id="try-status"></span>
+      </div>
+      <div class="error" id="try-error" hidden></div>
+      <div class="results" id="try-results"></div>
+    </section>
+
+    <section>
+      <h2><span class="step">4</span> Run the whole test set</h2>
+      <p class="note" id="plan">&nbsp;</p>
+      <div class="row">
+        <input type="text" id="run-name" placeholder="Run name (optional), e.g. baseline" style="width: 280px" aria-label="Run name">
+        <label class="row" style="gap: 6px"><input type="checkbox" id="use-cache" checked> Use cached responses</label>
+        <button class="btn primary" id="run-all">Run all cases</button>
+        <span class="muted" id="run-status"></span>
+      </div>
+      <div class="progress" id="progress" hidden><i></i></div>
+      <div class="error" id="run-error" hidden></div>
+      <div id="run-results"></div>
+    </section>
+    </div>
+  </div>
+
+  <!-- ============ Runs ============ -->
+  <div id="tab-runs" hidden>
+    <section>
+      <h1>Saved runs</h1>
+      <p class="sub">Every run of a whole test set is saved with its prompts, results and config hash.</p>
+      <div class="scroll" style="margin-top: 14px"><table id="runs-table"><thead></thead><tbody></tbody></table></div>
+      <p class="empty" id="runs-empty" hidden>No runs yet. Go to Lab and press "Run all cases".</p>
+    </section>
+  </div>
+
+  <!-- ============ Compare ============ -->
+  <div id="tab-compare" hidden>
+    <section>
+      <h1>Compare two runs</h1>
+      <p class="sub">A regression is a case that passed in the earlier run and fails in the later one.</p>
+      <div class="row" style="margin-top: 14px">
+        <label class="row" style="gap: 6px">A (before) <select id="cmp-a"></select></label>
+        <label class="row" style="gap: 6px">B (after) <select id="cmp-b"></select></label>
+        <button class="btn primary" id="cmp-go">Compare</button>
+      </div>
+      <div class="error" id="cmp-error" hidden></div>
+    </section>
+    <div id="cmp-out"></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- small helpers ----------
+  var $ = function (id) { return document.getElementById(id); };
+  // Everything that comes from a model, a test set or a file is inserted as text, never as HTML.
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined && text !== null) node.textContent = text;
+    return node;
+  }
+  function add(parent) {
+    for (var i = 1; i < arguments.length; i++) if (arguments[i]) parent.appendChild(arguments[i]);
+    return parent;
+  }
+  function clear(node) { node.textContent = ""; return node; }
+  function show(value) { return typeof value === "string" ? value : JSON.stringify(value, null, 2); }
+  function pct(v) { return v === null || v === undefined ? "n/a" : (v * 100).toFixed(1) + "%"; }
+  function cost(v) { return v === null || v === undefined ? "n/a" : v === 0 ? "$0" : v < 0.01 ? "$" + v.toFixed(6) : "$" + v.toFixed(4); }
+  function ms(v) { return v === null || v === undefined ? "n/a" : (v < 10 ? v.toFixed(1) : v.toFixed(0)) + " ms"; }
+  function when(iso) { return iso.replace("T", " ").replace("+00:00", " UTC"); }
+  function setError(id, message) { var box = $(id); box.hidden = !message; box.textContent = message || ""; }
+
+  async function api(path, body) {
+    var options = body === undefined ? {} : {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+    };
+    var response = await fetch(path, options);
+    var data = null;
+    try { data = await response.json(); } catch (e) { /* not JSON */ }
+    if (!response.ok) {
+      var detail = data && data.detail;
+      if (Array.isArray(detail)) detail = detail.map(function (d) { return (d.loc || []).join(".") + ": " + d.msg; }).join("; ");
+      throw new Error(detail || ("Request failed (" + response.status + ")"));
+    }
+    return data;
+  }
+
+  var PLACEHOLDER = /\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}|\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
+  function templateVars(text) {
+    var names = [], match;
+    PLACEHOLDER.lastIndex = 0;
+    while ((match = PLACEHOLDER.exec(text || "")) !== null) {
+      if (match[2] && names.indexOf(match[2]) < 0) names.push(match[2]);
+    }
+    return names;
+  }
+
+  // ---------- state ----------
+  var state = { exp: null, prompts: [], models: {}, vars: {}, runs: [] };
+
+  // ---------- tabs ----------
+  var TABS = ["lab", "runs", "compare"];
+  function showTab(name) {
+    if (TABS.indexOf(name) < 0) name = "lab";
+    TABS.forEach(function (tab) { $("tab-" + tab).hidden = tab !== name; });
+    document.querySelectorAll("nav button").forEach(function (button) {
+      button.setAttribute("aria-selected", String(button.getAttribute("data-tab") === name));
+    });
+    if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+    if (name === "runs" || name === "compare") loadRuns();
+  }
+  document.querySelectorAll("nav button").forEach(function (button) {
+    button.addEventListener("click", function () { showTab(button.getAttribute("data-tab")); });
+  });
+  window.addEventListener("hashchange", function () { showTab(location.hash.slice(1)); });
+
+  // ---------- experiment ----------
+  async function loadExperiments() {
+    var list = await api("/api/experiments");
+    var select = clear($("experiment"));
+    if (!list.length) {
+      $("lab-body").hidden = true;
+      setError("exp-error", "No experiment files found here. Run \"prompt-lab init\" in this folder, or start the app from a folder that has an experiment YAML file.");
+      return;
+    }
+    list.forEach(function (item) {
+      var option = el("option", null, item.error ? item.id + " (cannot load)" : item.name + "  ·  " + item.id);
+      option.value = item.id;
+      select.appendChild(option);
+    });
+    var remembered = null;
+    try { remembered = localStorage.getItem("promptlab.experiment"); } catch (e) { /* storage unavailable */ }
+    var usable = list.filter(function (item) { return !item.error; });
+    var pick = list.some(function (item) { return item.id === remembered; }) ? remembered : (usable[0] || list[0]).id;
+    select.value = pick;
+    await loadExperiment(pick);
+  }
+
+  async function loadExperiment(id) {
+    setError("exp-error", "");
+    try {
+      state.exp = await api("/api/experiment?id=" + encodeURIComponent(id));
+    } catch (error) {
+      state.exp = null;
+      $("lab-body").hidden = true;
+      $("mock-banner").hidden = true;
+      clear($("exp-chips")); $("exp-desc").textContent = "";
+      setError("exp-error", "This experiment file cannot be loaded: " + error.message);
+      return;
+    }
+    try { localStorage.setItem("promptlab.experiment", id); } catch (e) { /* storage unavailable */ }
+    var exp = state.exp;
+    $("lab-body").hidden = false;
+    $("exp-desc").textContent = exp.description || "";
+    var chips = clear($("exp-chips"));
+    add(chips,
+      el("span", "chip", exp.dataset.cases + " test cases" + (exp.dataset.synthetic ? " (synthetic)" : "")),
+      el("span", "chip", "scorers: " + exp.scorers.map(function (s) { return s.name + (s.required ? "" : " (advisory)"); }).join(", ")),
+      el("span", "chip mono", "config " + exp.config_hash.slice(0, 8)));
+    exp.warnings.forEach(function (w) { chips.appendChild(el("span", "chip", "Warning: " + w)); });
+    $("mock-banner").hidden = !exp.models.some(function (m) { return m.provider === "mock"; });
+
+    state.prompts = exp.prompts.map(function (p) { return { id: p.id, template: p.template, system: p.system || "" }; });
+    state.models = {};
+    exp.models.forEach(function (m) { state.models[m.id] = m.available; });
+    state.vars = {};
+    renderPrompts(); renderModels(); renderCases(); renderVars();
+    clear($("try-results")); clear($("run-results")); setError("try-error", ""); setError("run-error", "");
+    $("try-status").textContent = ""; $("run-status").textContent = "";
+    schedulePlan();
+  }
+  $("experiment").addEventListener("change", function () { loadExperiment($("experiment").value); });
+
+  // ---------- 1. prompts ----------
+  function original(id) {
+    return state.exp.prompts.filter(function (p) { return p.id === id; })[0];
+  }
+  function isEdited(prompt) {
+    var source = original(prompt.id);
+    return !source || source.template !== prompt.template || (source.system || "") !== prompt.system;
+  }
+  function renderPrompts() {
+    var holder = clear($("prompts"));
+    state.prompts.forEach(function (prompt, index) {
+      var card = el("div", "card");
+      var head = el("div", "card-head");
+      var idInput = el("input"); idInput.type = "text"; idInput.value = prompt.id;
+      idInput.setAttribute("aria-label", "Variant name");
+      var badge = el("span", "edited", isEdited(prompt) ? "edited" : "");
+      idInput.addEventListener("input", function () {
+        prompt.id = idInput.value.trim(); badge.textContent = isEdited(prompt) ? "edited" : ""; schedulePlan();
+      });
+      var remove = el("button", "btn small", "Remove"); remove.type = "button";
+      remove.disabled = state.prompts.length === 1;
+      remove.addEventListener("click", function () { state.prompts.splice(index, 1); renderPrompts(); renderVars(); schedulePlan(); });
+      add(head, idInput, badge, remove);
+
+      var template = el("textarea", "code"); template.rows = 13; template.spellcheck = false; template.value = prompt.template;
+      template.setAttribute("aria-label", "Prompt template for " + prompt.id);
+      template.addEventListener("input", function () {
+        prompt.template = template.value; badge.textContent = isEdited(prompt) ? "edited" : ""; renderVars(); schedulePlan();
+      });
+
+      var sys = el("details", "sys"); if (prompt.system) sys.open = true;
+      sys.appendChild(el("summary", null, "System prompt (optional)"));
+      var system = el("textarea", "code"); system.rows = 3; system.spellcheck = false; system.value = prompt.system;
+      system.setAttribute("aria-label", "System prompt for " + prompt.id);
+      system.addEventListener("input", function () {
+        prompt.system = system.value; badge.textContent = isEdited(prompt) ? "edited" : ""; renderVars(); schedulePlan();
+      });
+      sys.appendChild(system);
+      add(card, head, template, sys);
+      holder.appendChild(card);
+    });
+  }
+  $("add-prompt").addEventListener("click", function () {
+    var last = state.prompts[state.prompts.length - 1];
+    var base = last.id.replace(/_copy\d*$/, ""), n = 1, id = base + "_copy";
+    while (state.prompts.some(function (p) { return p.id === id; })) { n += 1; id = base + "_copy" + n; }
+    state.prompts.push({ id: id, template: last.template, system: last.system });
+    renderPrompts(); schedulePlan();
+  });
+  $("reset-prompts").addEventListener("click", function () {
+    state.prompts = state.exp.prompts.map(function (p) { return { id: p.id, template: p.template, system: p.system || "" }; });
+    renderPrompts(); renderVars(); schedulePlan();
+  });
+
+  // ---------- 2. models ----------
+  function renderModels() {
+    var holder = clear($("models"));
+    state.exp.models.forEach(function (model) {
+      var label = el("label", "model" + (model.available ? "" : " off"));
+      var box = el("input"); box.type = "checkbox"; box.checked = !!state.models[model.id]; box.disabled = !model.available;
+      box.addEventListener("change", function () { state.models[model.id] = box.checked; updateMockHint(); schedulePlan(); });
+      var text = el("span");
+      add(text, el("strong", "mono", model.id),
+        el("small", null, model.provider === "mock" ? "mock provider (scripted, offline)" : model.provider + " · " + model.model),
+        model.available ? null : el("small", null, "Not available: " + model.problem));
+      add(label, box, text);
+      holder.appendChild(label);
+    });
+    updateMockHint();
+  }
+  function selectedModels() {
+    return state.exp.models.filter(function (m) { return state.models[m.id]; }).map(function (m) { return m.id; });
+  }
+  function updateMockHint() {
+    var chosen = state.exp.models.filter(function (m) { return state.models[m.id]; });
+    $("mock-hint").hidden = !chosen.length || chosen.some(function (m) { return m.provider !== "mock"; });
+  }
+  function selection() {
+    return {
+      experiment: state.exp.id,
+      prompts: state.prompts.map(function (p) { return { id: p.id, template: p.template, system: p.system || null }; }),
+      models: selectedModels(),
+      use_cache: $("use-cache").checked
+    };
+  }
+
+  // ---------- 3. try one input ----------
+  function renderCases() {
+    var select = clear($("case"));
+    var custom = el("option", null, "Custom input (nothing loaded)"); custom.value = ""; select.appendChild(custom);
+    state.exp.cases.forEach(function (c) {
+      var option = el("option", null, c.id + (c.tags.length ? "  ·  " + c.tags.join(", ") : "")); option.value = c.id;
+      select.appendChild(option);
+    });
+    var first = state.exp.cases[0];
+    if (first) { select.value = first.id; loadCase(first); } else { loadCase(null); }
+  }
+  function loadCase(c) {
+    state.vars = {};
+    if (c) Object.keys(c.vars).forEach(function (name) { state.vars[name] = show(c.vars[name]); });
+    $("expected").value = c && c.expected !== null && c.expected !== undefined ? show(c.expected) : "";
+    $("tags").value = c ? c.tags.join(", ") : "";
+    renderVars();
+  }
+  $("case").addEventListener("change", function () {
+    var id = $("case").value;
+    loadCase(state.exp.cases.filter(function (c) { return c.id === id; })[0] || null);
+  });
+  function neededVars() {
+    var names = [];
+    state.prompts.forEach(function (p) {
+      templateVars(p.template).concat(templateVars(p.system)).forEach(function (n) { if (names.indexOf(n) < 0) names.push(n); });
+    });
+    return names;
+  }
+  function renderVars() {
+    var holder = $("vars"), names = neededVars();
+    var focused = document.activeElement && document.activeElement.getAttribute("data-var");
+    clear(holder);
+    if (!names.length) { holder.appendChild(el("p", "empty", "These prompts use no {variables}, so there is nothing to type.")); return; }
+    names.forEach(function (name) {
+      var label = el("label", "field", "Input: " + name); label.setAttribute("for", "var-" + name);
+      var area = el("textarea"); area.id = "var-" + name; area.rows = 5; area.value = state.vars[name] || "";
+      area.setAttribute("data-var", name);
+      area.placeholder = "Type or paste the " + name + " here";
+      area.addEventListener("input", function () { state.vars[name] = area.value; });
+      add(holder, label, area);
+    });
+    if (focused && $("var-" + focused)) $("var-" + focused).focus();
+  }
+  function expectedValue() {
+    var text = $("expected").value.trim();
+    if (!text) return null;
+    try { return JSON.parse(text); } catch (e) { return text; }
+  }
+
+  function verdict(row) {
+    var wrap = el("span", "verdict");
+    var kind = row.status === "error" ? "err" : row.passed ? "pass" : "fail";
+    var dot = el("span", "dot " + kind, kind === "pass" ? "✓" : kind === "fail" ? "✕" : "!");
+    dot.setAttribute("aria-hidden", "true");
+    add(wrap, dot, document.createTextNode(kind === "err" ? "error" : (kind === "pass" ? "pass " : "fail ") + row.score.toFixed(2)));
+    return wrap;
+  }
+  function resultBox(row) {
+    var box = el("div", "box");
+    var head = el("h3");
+    add(head, el("span", "mono", row.prompt_id), verdict(row));
+    box.appendChild(head);
+    var meta = [ms(row.latency_ms)];
+    if (row.usage) meta.push(row.usage.prompt_tokens + " in / " + row.usage.completion_tokens + " out tokens");
+    if (row.cost_usd !== null && row.cost_usd !== undefined) meta.push("est. " + cost(row.cost_usd));
+    if (row.cached) meta.push("from cache");
+    if (row.attempts > 1) meta.push(row.attempts + " attempts");
+    box.appendChild(el("div", "muted", meta.join(" · ")));
+    if (row.status === "error") {
+      box.appendChild(el("div", "label", "Call error"));
+      box.appendChild(el("pre", null, row.error.type + ": " + row.error.message));
+      return box;
+    }
+    box.appendChild(el("div", "label", "Output"));
+    box.appendChild(el("pre", null, row.output === "" ? "(empty output)" : row.output));
+    box.appendChild(el("div", "label", "Scores"));
+    var list = el("ul", "reasons");
+    row.scores.forEach(function (s) {
+      var kind = s.error ? "err" : s.passed ? "pass" : "fail";
+      var item = el("li");
+      var dot = el("span", "dot " + kind, kind === "pass" ? "✓" : kind === "fail" ? "✕" : "!");
+      dot.setAttribute("aria-label", kind === "pass" ? "passed" : kind === "fail" ? "failed" : "scorer error");
+      var text = el("span");
+      add(text, el("strong", null, s.scorer + (s.required ? "" : " (advisory)")), document.createTextNode(" " + s.reason));
+      add(item, dot, text);
+      list.appendChild(item);
+    });
+    box.appendChild(list);
+    return box;
+  }
+  function renderTryResults(rows) {
+    var holder = clear($("try-results"));
+    var models = [];
+    rows.forEach(function (r) { if (models.indexOf(r.model_id) < 0) models.push(r.model_id); });
+    models.forEach(function (modelId) {
+      var block = el("div", "model-row");
+      block.appendChild(el("div", "name", "Model: " + modelId));
+      var grid = el("div", "variants");
+      rows.filter(function (r) { return r.model_id === modelId; }).forEach(function (r) { grid.appendChild(resultBox(r)); });
+      block.appendChild(grid);
+      holder.appendChild(block);
+    });
+  }
+  $("try").addEventListener("click", async function () {
+    setError("try-error", "");
+    if (!selectedModels().length) { setError("try-error", "Select at least one model."); return; }
+    var body = selection();
+    body.vars = {};
+    neededVars().forEach(function (name) { body.vars[name] = state.vars[name] || ""; });
+    body.expected = expectedValue();
+    body.tags = $("tags").value.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+    var button = $("try"), status = clear($("try-status"));
+    button.disabled = true; add(status, el("span", "spin"), document.createTextNode("Running..."));
+    try {
+      var data = await api("/api/try", body);
+      renderTryResults(data.rows);
+      var passed = data.rows.filter(function (r) { return r.passed; }).length;
+      clear(status).textContent = passed + " of " + data.rows.length + " passed";
+    } catch (error) {
+      clear(status); clear($("try-results")); setError("try-error", error.message);
+    } finally { button.disabled = false; }
+  });
+
+  // ---------- 4. run the whole test set ----------
+  var planTimer = null;
+  function schedulePlan() { clearTimeout(planTimer); planTimer = setTimeout(updatePlan, 350); }
+  async function updatePlan() {
+    if (!state.exp) return;
+    var line = $("plan");
+    if (!selectedModels().length) { line.textContent = "Select at least one model."; return; }
+    try {
+      var plan = await api("/api/plan", selection());
+      line.textContent = plan.prompts + " prompts × " + plan.models + " models × " + plan.cases + " cases = " +
+        plan.total + " calls. " + plan.cached + " already cached, " + plan.to_call + " to make.";
+      setError("run-error", "");
+    } catch (error) {
+      line.textContent = "This cannot run yet:";
+      setError("run-error", error.message);
+    }
+  }
+  $("use-cache").addEventListener("change", schedulePlan);
+
+  function summaryTable(summary) {
+    var wrap = el("div", "scroll");
+    var table = el("table"), head = el("tr");
+    ["Prompt", "Model"].forEach(function (h) { head.appendChild(el("th", null, h)); });
+    ["Pass rate", "Passed", "Mean score", "Errors", "p50 latency", "Est. cost"].forEach(function (h) { head.appendChild(el("th", "num", h)); });
+    add(table, add(el("thead"), head));
+    var body = el("tbody");
+    summary.groups.forEach(function (g) {
+      var tr = el("tr");
+      add(tr, el("td", "mono", g.prompt_id), el("td", "mono", g.model_id));
+      var rate = el("td", "num", pct(g.pass_rate));
+      var meter = el("span", "meter"), fill = el("i"); fill.style.width = ((g.pass_rate || 0) * 100).toFixed(1) + "%";
+      meter.appendChild(fill); rate.appendChild(meter);
+      add(tr, rate, el("td", "num", g.passed + "/" + g.cases), el("td", "num", g.mean_score.toFixed(3)),
+        el("td", "num", String(g.errors)), el("td", "num", ms(g.latency_ms_p50)), el("td", "num", cost(g.cost_usd)));
+      body.appendChild(tr);
+    });
+    table.appendChild(body); wrap.appendChild(table);
+    return wrap;
+  }
+  async function showRunResult(runId) {
+    var summary = await api("/api/runs/" + encodeURIComponent(runId));
+    var holder = clear($("run-results"));
+    var totals = summary.totals;
+    var head = el("p", null, "");
+    head.style.margin = "16px 0 8px";
+    add(head, el("strong", null, "Run " + runId + ": "),
+      document.createTextNode(totals.passed + " of " + totals.cases + " cells passed, " + totals.errors + " call errors. " +
+        (totals.cases - totals.cached) + " calls made, " + totals.cached + " from cache. Estimated cost " + cost(totals.cost_usd) + "."));
+    holder.appendChild(head);
+    holder.appendChild(summaryTable(summary));
+    var actions = el("div", "row"); actions.style.marginTop = "12px";
+    var report = el("a", "btn primary", "Open full report"); report.href = "/runs/" + encodeURIComponent(runId) + "/report";
+    actions.appendChild(report);
+    await loadRuns();
+    var others = state.runs.filter(function (r) { return r.run_id !== runId; });
+    if (others.length) {
+      var select = el("select"); select.setAttribute("aria-label", "Earlier run to compare with");
+      others.forEach(function (r) { var o = el("option", null, r.run_id); o.value = r.run_id; select.appendChild(o); });
+      var go = el("button", "btn", "Compare with this earlier run"); go.type = "button";
+      go.addEventListener("click", function () { openCompare(select.value, runId); });
+      add(actions, select, go);
+    }
+    holder.appendChild(actions);
+  }
+  $("run-all").addEventListener("click", async function () {
+    setError("run-error", "");
+    if (!selectedModels().length) { setError("run-error", "Select at least one model."); return; }
+    var body = selection(); body.name = $("run-name").value;
+    var button = $("run-all"), status = $("run-status"), bar = $("progress");
+    button.disabled = true; clear($("run-results"));
+    try {
+      var job = await api("/api/runs", body);
+      bar.hidden = false;
+      while (job.status === "running") {
+        bar.firstElementChild.style.width = (job.total ? (job.done / job.total) * 100 : 0) + "%";
+        status.textContent = job.done + " / " + job.total + " cells";
+        await new Promise(function (resolve) { setTimeout(resolve, 250); });
+        job = await api("/api/jobs/" + job.id);
+      }
+      bar.firstElementChild.style.width = "100%";
+      if (job.status === "error") throw new Error(job.error);
+      status.textContent = "Done";
+      await showRunResult(job.run_id);
+      schedulePlan();
+    } catch (error) {
+      status.textContent = ""; setError("run-error", error.message);
+    } finally { button.disabled = false; setTimeout(function () { bar.hidden = true; }, 600); }
+  });
+
+  // ---------- Runs ----------
+  async function loadRuns() {
+    state.runs = await api("/api/runs");
+    var table = $("runs-table"), head = clear(table.querySelector("thead")), body = clear(table.querySelector("tbody"));
+    $("runs-empty").hidden = state.runs.length > 0;
+    table.hidden = state.runs.length === 0;
+    var tr = el("tr");
+    ["Run", "Experiment", "Started"].forEach(function (h) { tr.appendChild(el("th", null, h)); });
+    ["Cells", "Pass rate", "Est. cost"].forEach(function (h) { tr.appendChild(el("th", "num", h)); });
+    add(tr, el("th", null, "Models"), el("th", null, ""));
+    head.appendChild(tr);
+    state.runs.forEach(function (run) {
+      var row = el("tr");
+      add(row, el("td", "mono", run.run_id), el("td", null, run.experiment), el("td", null, when(run.started_at)),
+        el("td", "num", String(run.cells) + (run.partial ? " (partial)" : "")), el("td", "num", pct(run.pass_rate)),
+        el("td", "num", cost(run.cost_usd)), el("td", null, run.mock ? "mock" : "real"));
+      var actions = el("td");
+      var report = el("a", "link", "Report"); report.href = "/runs/" + encodeURIComponent(run.run_id) + "/report";
+      var compare = el("button", "linkish", "Compare"); compare.type = "button"; compare.style.marginLeft = "14px";
+      compare.addEventListener("click", function () {
+        var earlier = state.runs.filter(function (r) { return r.started_at < run.started_at; })[0];
+        openCompare(earlier ? earlier.run_id : run.run_id, run.run_id);
+      });
+      add(actions, report, compare);
+      row.appendChild(actions);
+      body.appendChild(row);
+    });
+    fillCompareSelects();
+  }
+
+  // ---------- Compare ----------
+  function fillCompareSelects() {
+    ["cmp-a", "cmp-b"].forEach(function (id, index) {
+      var select = $(id), current = select.value;
+      clear(select);
+      state.runs.forEach(function (run) { var o = el("option", null, run.run_id); o.value = run.run_id; select.appendChild(o); });
+      if (current && state.runs.some(function (r) { return r.run_id === current; })) select.value = current;
+      else if (state.runs.length > 1) select.value = state.runs[index === 0 ? 1 : 0].run_id;  // A = previous, B = newest
+    });
+  }
+  async function openCompare(a, b) {
+    showTab("compare");
+    await loadRuns();
+    $("cmp-a").value = a; $("cmp-b").value = b;
+    runCompare();
+  }
+  function changesTable(title, changes, whyHeader) {
+    var section = el("section");
+    section.appendChild(el("h2", null, title + " (" + changes.length + ")"));
+    var wrap = el("div", "scroll"); wrap.style.marginTop = "10px";
+    var table = el("table"), head = el("tr");
+    add(head, el("th", null, "Case"), el("th", null, "Prompt"), el("th", null, "Model"), el("th", "num", "Score A → B"), el("th", null, whyHeader));
+    add(table, add(el("thead"), head));
+    var body = el("tbody");
+    changes.forEach(function (c) {
+      var tr = el("tr");
+      add(tr, el("td", "mono", c.case_id), el("td", "mono", c.prompt_id), el("td", "mono", c.model_id),
+        el("td", "num", c.score_a.toFixed(2) + " → " + c.score_b.toFixed(2)));
+      var why = el("td");
+      c.reasons.forEach(function (r) { why.appendChild(el("div", null, r)); });
+      tr.appendChild(why); body.appendChild(tr);
+    });
+    table.appendChild(body); wrap.appendChild(table); section.appendChild(wrap);
+    return section;
+  }
+  async function runCompare() {
+    setError("cmp-error", "");
+    var out = clear($("cmp-out"));
+    var a = $("cmp-a").value, b = $("cmp-b").value;
+    if (!a || !b) { setError("cmp-error", "You need two saved runs to compare. Run the test set twice from the Lab tab."); return; }
+    var data;
+    try { data = await api("/api/compare?a=" + encodeURIComponent(a) + "&b=" + encodeURIComponent(b)); }
+    catch (error) { setError("cmp-error", error.message); return; }
+    var counts = data.counts;
+
+    var top = el("section");
+    var verdictLine = el("h2", null, counts.regressions + " regressions, " + counts.fixes + " fixes");
+    top.appendChild(verdictLine);
+    top.appendChild(el("p", "note", "Compared " + counts.compared + " cells present in both runs: " + counts.still_passing +
+      " still passing, " + counts.still_failing + " still failing." +
+      (counts.only_in_a || counts.only_in_b ? " Not compared: " + counts.only_in_a + " only in A, " + counts.only_in_b + " only in B." : "")));
+    var edits = [];
+    if (data.changed_prompts.length) edits.push("prompts changed: " + data.changed_prompts.join(", "));
+    if (data.changed_models.length) edits.push("models changed: " + data.changed_models.join(", "));
+    if (data.changed_scorers) edits.push("scorers changed");
+    top.appendChild(el("p", "sub", data.same_config ? "Same config hash: any difference comes from the models, not from your files."
+      : edits.length ? "Between A and B: " + edits.join("; ") + "." : "The two runs have different configs."));
+    if (data.run_a.mock_models.length || data.run_b.mock_models.length) {
+      var banner = el("div", "banner");
+      add(banner, el("span", "icon", "!"), el("p", null, "Mock results. These outputs come from the scripted mock provider, not from a real model. They are not a benchmark."));
+      top.appendChild(banner);
+    }
+    data.warnings.forEach(function (w) { top.appendChild(el("div", "error", "Warning: " + w)); });
+
+    var wrap = el("div", "scroll"); wrap.style.marginTop = "14px";
+    var table = el("table"), head = el("tr");
+    add(head, el("th", null, "Prompt"), el("th", null, "Model"));
+    ["A", "B", "Change", "Regressions", "Fixes"].forEach(function (h) { head.appendChild(el("th", "num", h)); });
+    add(table, add(el("thead"), head));
+    var body = el("tbody");
+    data.groups.forEach(function (g) {
+      var tr = el("tr");
+      var delta = g.pass_rate_delta * 100;
+      var change = el("td", "num " + (delta < 0 ? "down" : delta > 0 ? "up" : "muted"),
+        delta === 0 ? "0.0 pts" : (delta > 0 ? "+" : "") + delta.toFixed(1) + " pts");
+      add(tr, el("td", "mono", g.prompt_id), el("td", "mono", g.model_id),
+        el("td", "num", pct(g.pass_rate_a) + " (" + g.passed_a + "/" + g.cases + ")"),
+        el("td", "num", pct(g.pass_rate_b) + " (" + g.passed_b + "/" + g.cases + ")"),
+        change, el("td", "num", String(g.regressions)), el("td", "num", String(g.fixes)));
+      body.appendChild(tr);
+    });
+    table.appendChild(body); wrap.appendChild(table); top.appendChild(wrap);
+    out.appendChild(top);
+    if (data.regressions.length) out.appendChild(changesTable("Regressions: passed in A, fail in B", data.regressions, "Why it fails now"));
+    if (data.fixes.length) out.appendChild(changesTable("Fixes: failed in A, pass in B", data.fixes, "Why it failed before"));
+  }
+  $("cmp-go").addEventListener("click", runCompare);
+
+  // ---------- start ----------
+  api("/api/status").then(function (s) { $("where").textContent = s.root; }).catch(function () {});
+  showTab(location.hash.slice(1) || "lab");
+  loadExperiments().catch(function (error) { setError("exp-error", error.message); });
+})();
+</script>
+</body>
+</html>

@@ -220,8 +220,14 @@ class Runner:
         try:
             return list(await asyncio.gather(*(self._run_cell(*cell) for cell in self.cells())))
         finally:
-            for provider in self._owned:
-                await provider.aclose()
+            await self.aclose()
+
+    async def aclose(self) -> None:
+        """Close the providers this runner built. They are rebuilt if the runner is used again."""
+        for provider in self._owned:
+            await provider.aclose()
+        self._providers = {k: v for k, v in self._providers.items() if v not in self._owned}
+        self._owned = []
 
     async def _call(self, model_id: str, request: CompletionRequest) -> _Call:
         """One model call through the cache, the concurrency limits and the retry loop."""

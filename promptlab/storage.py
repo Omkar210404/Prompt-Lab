@@ -76,6 +76,12 @@ def make_run_id(experiment_name: str, config_hash: str, started_at: datetime) ->
     return f"{started_at:%Y%m%dT%H%M%SZ}-{slugify(experiment_name)}-{config_hash[:8]}"
 
 
+def validate_run_name(name: str) -> None:
+    """A run name becomes a folder name, so it must not be able to point anywhere else."""
+    if not _SAFE_NAME.fullmatch(name):
+        raise ConfigError(f"invalid run name '{name}': use letters, digits, dot, dash and underscore")
+
+
 def _is_run_dir(path: Path) -> bool:
     return (path / SUMMARY_FILE).is_file()
 
@@ -202,8 +208,8 @@ def save_run(
     name: str | None = None,
 ) -> Path:
     """Write a run directory and return its path. `name` gives it a fixed folder name instead of a timestamp."""
-    if name is not None and not _SAFE_NAME.fullmatch(name):
-        raise ConfigError(f"invalid run name '{name}': use letters, digits, dot, dash and underscore")
+    if name is not None:
+        validate_run_name(name)
     run_id = name or make_run_id(loaded.experiment.name, loaded.config_hash, started_at)
     run_dir = _prepare_run_dir(Path(runs_dir), run_id, named=name is not None)
     run_id = run_dir.name

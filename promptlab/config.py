@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -337,5 +337,30 @@ def load_experiment(path: str | Path) -> LoadedExperiment:
         dataset_sha256=dataset_sha256,
         config_hash=compute_config_hash(experiment, cases, dataset_sha256, base_dir),
         prices_path=prices_path,
+        warnings=warnings,
+    )
+
+
+def override_experiment(loaded: LoadedExperiment, prompts: list[dict[str, Any]] | None = None,
+                        cases: list[TestCase] | None = None) -> LoadedExperiment:
+    """A copy of a loaded experiment with different prompts and/or test cases, validated the same way.
+
+    The web UI uses this: prompts are edited in the browser, and a single typed input is a test case.
+    """
+    data = loaded.experiment.model_dump(mode="json")
+    if prompts is not None:
+        data["prompts"] = prompts
+    try:
+        experiment = Experiment.model_validate(data)
+    except ValidationError as exc:
+        raise ConfigError(_format_validation_error(exc)) from exc
+    cases = loaded.cases if cases is None else cases
+    _check_variables(experiment, cases)
+    warnings = _check_scorers(experiment, cases, loaded.base_dir)
+    return replace(
+        loaded,
+        experiment=experiment,
+        cases=cases,
+        config_hash=compute_config_hash(experiment, cases, loaded.dataset_sha256, loaded.base_dir),
         warnings=warnings,
     )

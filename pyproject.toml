@@ -19,6 +19,8 @@ dependencies = [
     "jsonschema>=4.20",
     "Jinja2>=3.1",
     "python-dotenv>=1.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
 ]
 
 [project.scripts]
@@ -28,7 +30,7 @@ prompt-lab = "promptlab.cli:app"
 include = ["promptlab*"]
 
 [tool.setuptools.package-data]
-promptlab = ["report/templates/*", "scaffold/*", "scaffold/**/*"]
+promptlab = ["report/templates/*", "scaffold/*", "scaffold/**/*", "ui/static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

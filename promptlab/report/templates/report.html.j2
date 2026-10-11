@@ -145,6 +145,7 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 20px; }
 </head>
 <body>
 <main>
+  {% if app_nav %}<p style="margin-bottom: 14px"><a href="/#runs" style="color: var(--accent); text-decoration: none">&larr; Back to prompt-lab</a></p>{% endif %}
   <header>
     <h1>{{ summary.experiment }}</h1>
     {% if summary.description %}<p class="sub">{{ summary.description }}</p>{% endif %}

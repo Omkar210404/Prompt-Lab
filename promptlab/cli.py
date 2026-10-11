@@ -217,6 +217,40 @@ def compare(
         raise typer.Exit(code=1)
 
 
+@app.command()
+@handle_errors
+def ui(
+    root: Annotated[Path, typer.Option("--root", help="Folder that holds your experiment files.")] = Path("."),
+    port: Annotated[int, typer.Option("--port", min=1, max=65535, help="Port to serve on.")] = 8321,
+    runs_dir: Annotated[Optional[Path], typer.Option(
+        "--runs-dir", help="Where runs are saved. Default: <root>/runs.", envvar="PROMPTLAB_RUNS_DIR")] = None,
+    cache_dir: Annotated[Optional[Path], typer.Option(
+        "--cache-dir", help="Response cache folder. Default: <root>/.promptlab/cache.")] = None,
+    no_open: Annotated[bool, typer.Option("--no-open", help="Do not open a browser window.")] = False,
+) -> None:
+    """Open the web app: try an input, edit prompts, run the test set, compare runs."""
+    import socket
+    import threading
+
+    import uvicorn
+
+    from promptlab.ui import create_app
+
+    if not root.is_dir():
+        raise ConfigError(f"folder not found: {root}")
+    # The app can spend money on model calls, so it is served on this machine only.
+    host = "127.0.0.1"
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        if probe.connect_ex((host, port)) == 0:
+            raise ConfigError(f"port {port} is already in use. Is prompt-lab already running? Try --port {port + 1}.")
+
+    url = f"http://{host}:{port}"
+    console.print(f"prompt-lab is running at {url}  (press Ctrl+C to stop)", highlight=False)
+    if not no_open:
+        threading.Timer(1.0, webbrowser.open, args=(url,)).start()
+    uvicorn.run(create_app(root, runs_dir=runs_dir, cache_dir=cache_dir), host=host, port=port, log_level="warning")
+
+
 @app.command("list")
 @handle_errors
 def list_command(

@@ -126,5 +126,6 @@ def build_context(run: StoredRun) -> dict[str, Any]:
     }
 
 
-def render_html(run: StoredRun) -> str:
-    return _environment.get_template("report.html.j2").render(**build_context(run))
+def render_html(run: StoredRun, app_nav: bool = False) -> str:
+    """pp_nav adds a link back to the web app, for reports the app serves itself."""
+    return _environment.get_template("report.html.j2").render(**build_context(run), app_nav=app_nav)
