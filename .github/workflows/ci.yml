@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -e . --no-deps
+      - name: Run tests (mock provider, no keys or network needed)
+        run: pytest -q
+      - name: Run the mock demo end to end
+        run: |
+          prompt-lab run examples/support_extraction.yaml --name ci-demo --html
+          prompt-lab run examples/support_extraction_shortened.yaml --name ci-shortened
+          prompt-lab compare ci-demo ci-shortened
+          prompt-lab run examples/sentiment.yaml --name ci-sentiment
+          prompt-lab list
