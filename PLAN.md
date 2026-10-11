@@ -2,7 +2,9 @@
 
 Status: **approved** (2026-10-11). Decisions D1, D2, D4 and D5 accepted as proposed; D3 (a real-model run) is left for after the build. The README is the up-to-date description; this file records the original plan.
 
-Built as planned, with these small differences: the test set is labelled synthetic with a `{"_meta": ...}` first line instead of a comment, so the file stays valid JSON Lines; a run directory also keeps a copy of the test set, price table and schema files, so its `experiment.yaml` can be re-run; `report --failures N` and a `#case-<id>` link in the HTML report were added; the mock gained `drop_field` and `change_case` behaviours and lost `timeout` as a separate one (it is `error` with `kind: timeout`).
+**Decision D1 was reversed after the first build.** A read-only report turned out not to be a usable screen, so a local web app was added (`prompt-lab ui`, FastAPI plus one HTML page): edit prompts, try one input, run the whole test set, browse and compare runs. An example experiment for real models on Groq was added with it, not yet run.
+
+Otherwise built as planned, with these small differences: the test set is labelled synthetic with a `{"_meta": ...}` first line instead of a comment, so the file stays valid JSON Lines; a run directory also keeps a copy of the test set, price table and schema files, so its `experiment.yaml` can be re-run; `report --failures N` and a `#case-<id>` link in the HTML report were added; the mock gained `drop_field` and `change_case` behaviours and lost `timeout` as a separate one (it is `error` with `kind: timeout`).
 
 prompt-lab runs a matrix of prompt variants × models × test cases, scores every output with pluggable scorers, saves the run to disk, and shows the results side by side. The point is to measure prompt quality instead of eyeballing a few outputs.
 

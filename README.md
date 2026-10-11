@@ -4,9 +4,9 @@
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-A small evaluation tool for LLM prompts. It runs several prompt variants (and optionally several models) over a test set, scores every output with pluggable scorers, saves the run, and shows the results side by side. A second command diffs two runs and lists the cases that passed before and fail now.
+A small evaluation tool for LLM prompts. It runs several prompt variants (and optionally several models) over a test set, scores every output with pluggable scorers, saves the run, and shows the results side by side. It can also diff two runs and list the cases that passed before and fail now. Use it from a local web app or from the command line.
 
-![HTML report from the mock demo: pass rate per prompt and model, and pass rate per scorer](docs/screenshots/report-overview.png)
+![The prompt-lab web app: an experiment with three editable prompt variants and two models](docs/screenshots/app-lab.png)
 
 > **The screenshots and numbers in this README are mock results.** They come from a scripted, offline mock provider, not from a real model. They show how the tool works. They are not a benchmark of any model. See [What the demo is](#what-the-demo-is).
 
@@ -23,6 +23,7 @@ Changing a prompt is easy. Knowing whether the change made things better is not.
 
 ## What it does
 
+- **A local web app.** Edit prompts in the browser, try them on one input, run the whole test set with a progress bar, and compare runs.
 - **Experiments in YAML.** A name, prompt templates with `{variables}`, a JSONL test set, and the models to run.
 - **Runs the full matrix.** Every prompt × model × test case, with a concurrency limit, per-call timeouts and retries with backoff.
 - **Caches responses on disk.** A re-run does not repeat calls that were already paid for.
@@ -31,7 +32,7 @@ Changing a prompt is easy. Knowing whether the change made things better is not.
 - **Saves every run.** `results.jsonl` plus `summary.json`, with the config hash and timestamp.
 - **Reports.** A terminal table, and a self-contained HTML report with a chart, a side-by-side grid, a per-case drill-down and the worst failures.
 - **Compares two runs** and lists regressions, with a `--fail-on-regression` exit code for CI.
-- **Runs offline.** A deterministic mock provider drives the demo and all 248 tests. No key or network is needed.
+- **Runs offline.** A deterministic mock provider drives the demo and all 278 tests. No key or network is needed.
 
 ## Quick start
 
@@ -45,6 +46,35 @@ python -m venv .venv
 pip install -r requirements.txt
 pip install -e . --no-deps
 ```
+
+### The web app
+
+```bash
+prompt-lab ui
+```
+
+```text
+prompt-lab is running at http://127.0.0.1:8321  (press Ctrl+C to stop)
+```
+
+It opens in your browser and lists the experiment files in the current folder and in `examples/`. The demo experiments use the mock provider, so they need no API key. The page has four steps:
+
+1. **Prompts.** Each variant is a card you can edit, rename, remove or copy. Edits stay in the page; they are not written back to the experiment file.
+2. **Models.** Tick the models to run. A model whose API key is not set is shown as unavailable, with the reason.
+3. **Try one input.** Type an input or load a test case, set the expected answer, and press **Run this input**. Each variant's output appears side by side with its verdict and the reason from every scorer.
+4. **Run the whole test set.** Shows how many calls the run will make and how many are cached, then runs with a progress bar. The run is saved, with the prompts as you edited them.
+
+![Trying one input: the email, the expected answer, and three prompt variants with their outputs and scorer reasons](docs/screenshots/app-try.png)
+
+The **Runs** tab lists saved runs and opens the full report for each. The **Compare** tab diffs two runs:
+
+![Comparing two runs in the web app: 14 regressions after a prompt was shortened](docs/screenshots/app-compare.png)
+
+With the mock models, the answer does not depend on the text you type. The mock builds it from the expected answer and the scripted rules, and the app says so next to the input box. What does change the result is the wording of your prompts, because some rules look for it. Add `Respond with only a JSON object.` to `v1_bare`, press **Run all cases**, and its pass rate for `mock-careful` goes from 8/24 to 14/24. To have your typed input read and answered, use a real model: see [Using a real model](#using-a-real-model).
+
+The app is for your own machine. It listens on `127.0.0.1` only and refuses requests that come from other sites' pages, because a run can spend money on model calls.
+
+### The command line
 
 Run the demo. It uses the mock provider, so it needs no API key:
 
@@ -107,7 +137,11 @@ Est. cost: $0.005123 (spent this run: $0)
 
 ### The HTML report
 
-One file with CSS, JavaScript and data inline, so it opens offline and can be emailed or attached to a pull request. Click a test case to see its input, the expected answer, each variant's output and the reason every scorer gave:
+Every run can be written out as one HTML file with CSS, JavaScript and data inline, so it opens offline and can be emailed or attached to a pull request. The web app serves the same report for each saved run.
+
+![HTML report from the mock demo: pass rate per prompt and model, and pass rate per scorer](docs/screenshots/report-overview.png)
+
+Click a test case to see its input, the expected answer, each variant's output and the reason every scorer gave:
 
 ![Drill-down for one test case: input, expected answer, and three prompt variants with scorer reasons](docs/screenshots/report-drilldown.png)
 
@@ -200,6 +234,9 @@ flowchart LR
     ST --> T["CLI table"]
     ST --> H["HTML report"]
     ST --> CM["compare"]
+    UI["web app<br/>FastAPI + one HTML page"] --> C
+    UI --> R
+    UI --> ST
 ```
 
 | Module | Responsibility |
@@ -211,7 +248,8 @@ flowchart LR
 | `cache.py`, `pricing.py` | On-disk response cache; cost estimate from the price table |
 | `storage.py`, `summary.py` | Run directories, `results.jsonl`, `summary.json`, aggregation |
 | `report/`, `compare.py` | Terminal tables, the HTML report, the run diff |
-| `cli.py` | `init`, `run`, `report`, `compare`, `list` |
+| `cli.py` | `init`, `run`, `report`, `compare`, `list`, `ui` |
+| `ui/` | The local web app: a FastAPI server over the same modules, and one HTML page with no build step |
 
 A few decisions worth knowing:
 
@@ -224,6 +262,7 @@ A few decisions worth knowing:
 
 | Command | What it does |
 |---|---|
+| `prompt-lab ui` | Opens the web app. `--port`, `--root DIR`, `--no-open` |
 | `prompt-lab init [DIR]` | Writes a starter experiment, test set, price table and `.env.example` |
 | `prompt-lab run EXPERIMENT.yaml` | Runs the matrix, saves the run, prints the tables |
 | `prompt-lab report [RUN]` | Shows a saved run. `--html` writes the report, `--open` opens it, `--failures N` lists the worst failures |
@@ -401,8 +440,8 @@ The **config hash** covers everything that decides the outputs and the scores: p
 Any OpenAI-compatible Chat Completions API works: OpenAI, Groq, OpenRouter, Together, a local Ollama server.
 
 1. Copy `.env.example` to `.env` and set the key. Keys are read only from environment variables; an experiment file holds the variable's name, never the key.
-2. Add the model to an experiment (see [Experiment file](#experiment-file)) and its prices to the price table.
-3. Check the size of the run, try a few cases, then run it all:
+2. Add the model to an experiment (see [Experiment file](#experiment-file)) and its prices to the price table. `examples/support_extraction_real.yaml` is the demo experiment already set up for two models on Groq; it needs `GROQ_API_KEY`.
+3. In the web app, pick that experiment and use **Try one input**: a real model reads what you type. Or from the command line, check the size of the run, try a few cases, then run it all:
 
 ```bash
 prompt-lab run my_experiment.yaml --dry-run
@@ -410,7 +449,7 @@ prompt-lab run my_experiment.yaml --limit 5
 prompt-lab run my_experiment.yaml
 ```
 
-**Status:** the OpenAI-compatible provider is tested against a fake HTTP transport for success, 401, 403, 429 with `Retry-After`, 5xx, timeouts and malformed bodies. As of 2026-10-11 I have not run it against a live API, so this README contains no real-model results. If I add some later, they will state the date, the model names and the test set size, and that 24 cases is a small test, not a benchmark.
+**Status:** the OpenAI-compatible provider is tested against a fake HTTP transport for success, 401, 403, 429 with `Retry-After`, 5xx, timeouts and malformed bodies. As of 2026-10-11 I have not run it, or `support_extraction_real.yaml`, against a live API, so this README contains no real-model results. If I add some later, they will state the date, the model names and the test set size, and that 24 cases is a small test, not a benchmark.
 
 ## Extending it
 
@@ -486,10 +525,10 @@ pytest -q
 ```
 
 ```text
-248 passed in 15.21s
+278 passed in 23.97s
 ```
 
-Every test runs offline. A fixture refuses any network connection that leaves the machine, so a test that tried to reach an API would fail. Covered: each scorer, the runner (concurrency limits, timeouts, retries, error containment), the cache, cost estimation, storage, the HTML report (including escaping of hostile model output), `compare`, and the CLI end to end. GitHub Actions runs the tests and the mock demo on every push.
+Every test runs offline. A fixture refuses any network connection that leaves the machine, so a test that tried to reach an API would fail. Covered: each scorer, the runner (concurrency limits, timeouts, retries, error containment), the cache, cost estimation, storage, the HTML report (including escaping of hostile model output), `compare`, the CLI end to end, and the web app's server (trying an input, edited prompts, background runs, and refusing cross-site requests). The web page itself was checked by hand and with a scripted browser session, not by the test suite. GitHub Actions runs the tests and the mock demo on every push.
 
 ## Limitations
 
@@ -501,7 +540,9 @@ Every test runs offline. A fixture refuses any network connection that leaves th
 - **Cost is an estimate.** It depends on your price table being right and ignores things like cached-token discounts.
 - **`llm_judge` has the limits described above**, and the instruction to ignore text inside the graded output reduces prompt injection but does not prevent it.
 - **The HTML report embeds every row.** That is fine for hundreds or a few thousand cells and gets heavy beyond that.
-- **Runs are local files.** There is no database, server or shared dashboard.
+- **The mock ignores what you type.** In the web app, a mock model's answer comes from the expected answer and its rules, not from the input text. Only a real model reads the input.
+- **The web app is local and single-user.** No accounts, no sharing, and prompt edits made in the page are kept only in the runs they produce, not in the experiment file.
+- **Runs are local files.** There is no database or shared dashboard.
 
 ## Future ideas
 
