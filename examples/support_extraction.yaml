@@ -1,0 +1,152 @@
+# Demo experiment: extract ticket fields from a short support email as JSON.
+#
+#   prompt-lab run examples/support_extraction.yaml --name demo
+#
+# Both models are the scripted MOCK provider, so this runs offline with no API key.
+# The mock does not generate text. It starts from each case's expected answer and applies
+# the rules below, which are written to imitate common ways a model gets this task wrong.
+# The differences between the three prompts are therefore authored here, not discovered.
+# They show how prompt-lab works. They are not a benchmark of any model.
+
+name: support-email-extraction
+description: Extract order id, category, refund amount and sentiment from a support email as JSON. Mock demo.
+dataset: datasets/support_emails.jsonl
+
+prompts:
+  # v1: says what to extract, nothing about the format.
+  - id: v1_bare
+    template: |
+      Extract the order id, category, refund amount and sentiment from this support email.
+
+      {email}
+
+  # v2: fixes the output format and the allowed values.
+  - id: v2_json_rules
+    template: |
+      Extract fields from the support email below.
+
+      Respond with only a JSON object and no other text, with exactly these keys:
+      - "order_id": the order number, such as "ORD-12345"
+      - "category": one of "refund", "shipping", "billing", "technical", "account"
+      - "refund_amount": the amount the customer wants refunded
+      - "sentiment": one of "negative", "neutral", "positive"
+
+      Email:
+      {email}
+
+  # v3: adds rules for the edge cases, and two worked examples.
+  - id: v3_fewshot
+    template: |
+      Extract fields from the support email below.
+
+      Respond with only a JSON object and no other text, with exactly these keys:
+      - "order_id": the order number, such as "ORD-12345"
+      - "category": one of "refund", "shipping", "billing", "technical", "account"
+      - "refund_amount": the amount the customer wants refunded
+      - "sentiment": one of "negative", "neutral", "positive"
+
+      Rules:
+      - If the email has no order number, use null for order_id.
+      - If several order numbers appear, use the one the request is about.
+      - If no refund is requested, use null for refund_amount.
+      - refund_amount is a plain number with no currency symbol and no commas: 49.99, not "$49.99".
+      - Use "neutral" when the tone is mixed or the email is a purely factual request.
+
+      Example 1
+      Email: Order ORD-10001 came without the charger. Please refund the $19.00 I paid for it. Annoying.
+      {"order_id": "ORD-10001", "category": "refund", "refund_amount": 19.0, "sentiment": "negative"}
+
+      Example 2
+      Email: Is there a way to turn on two-factor login?
+      {"order_id": null, "category": "account", "refund_amount": null, "sentiment": "neutral"}
+
+      Email:
+      {email}
+
+models:
+  # A model that mostly follows instructions, when it is given them.
+  - id: mock-careful
+    provider: mock
+    mock:
+      latency_ms: 30
+      latency_jitter_ms: 30
+      rules:
+        - name: misses-sarcasm                      # no prompt here addresses sarcasm
+          when: { tags: [sarcasm] }
+          behave: wrong_field
+          set: { sentiment: positive }
+        - name: chatty-without-json-only            # for a fixed subset of cases, when not told "only a JSON object"
+          when: { prompt_lacks: "only a JSON object", rate: 0.4 }   # rate: a stable hash of the case id picks the cases
+          behave: prose_wrapped
+        - name: keeps-currency-symbol               # "$49.99" unless told to return a plain number
+          when: { prompt_lacks: "plain number", tags: [amount_with_currency] }
+          behave: number_as_string
+          field: refund_amount
+        - name: picks-first-order-id-010            # unless told which order number to use
+          when: { prompt_lacks: "several order numbers", case_ids: [email-010] }
+          behave: wrong_field
+          set: { order_id: ORD-21990 }
+        - name: picks-first-order-id-017
+          when: { prompt_lacks: "several order numbers", case_ids: [email-017] }
+          behave: wrong_field
+          set: { order_id: ORD-55310 }
+        - name: mixed-tone-read-as-negative         # unless told what "neutral" covers
+          when: { prompt_lacks: "tone is mixed", tags: [mixed_sentiment] }
+          behave: wrong_field
+          set: { sentiment: negative }
+
+  # A weaker model: always chatty without a format instruction, and it keeps a few
+  # mistakes whatever the prompt says.
+  - id: mock-sloppy
+    provider: mock
+    mock:
+      latency_ms: 10
+      latency_jitter_ms: 15
+      rules:
+        - name: truncated-output                    # a few answers are cut off, with any prompt
+          when: { rate: 0.08 }
+          behave: invalid_json
+        - name: misses-sarcasm
+          when: { tags: [sarcasm] }
+          behave: wrong_field
+          set: { sentiment: positive }
+        - name: chatty-without-json-only
+          when: { prompt_lacks: "only a JSON object" }
+          behave: prose_wrapped
+        - name: invents-an-order-id                 # "UNKNOWN" unless told to use null
+          when: { prompt_lacks: "use null for order_id", tags: [no_order_id] }
+          behave: wrong_field
+          set: { order_id: UNKNOWN }
+        - name: keeps-currency-symbol
+          when: { prompt_lacks: "plain number", tags: [amount_with_currency] }
+          behave: number_as_string
+          field: refund_amount
+        - name: picks-first-order-id-010
+          when: { prompt_lacks: "several order numbers", case_ids: [email-010] }
+          behave: wrong_field
+          set: { order_id: ORD-21990 }
+        - name: picks-first-order-id-017            # this one it gets wrong even when told
+          when: { case_ids: [email-017] }
+          behave: wrong_field
+          set: { order_id: ORD-55310 }
+        - name: mixed-tone-read-as-negative
+          when: { prompt_lacks: "tone is mixed", tags: [mixed_sentiment] }
+          behave: wrong_field
+          set: { sentiment: negative }
+
+scorers:
+  - type: json_valid                 # the whole output must parse; prose around JSON fails
+  - type: json_schema                # right keys, right types, allowed values
+    schema_file: schemas/ticket.schema.json
+  - type: json_fields                # the values match the expected answer
+    fields: [order_id, category, sentiment]
+  - type: numeric                    # the amount is a number, within one cent
+    field: refund_amount
+    abs_tol: 0.01
+
+run:
+  concurrency: 4
+  timeout_seconds: 30
+  max_retries: 2
+
+prices_file: prices.yaml             # fictional prices for the mock models

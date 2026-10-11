@@ -1,0 +1,81 @@
+# Second demo: classify the sentiment of the same support emails as one plain word.
+#
+#   prompt-lab run examples/sentiment.yaml --name sentiment
+#
+# It uses the text scorers (exact_match, regex, length) and one advisory scorer.
+# The model is the scripted MOCK provider: the results show how prompt-lab works,
+# they are not a benchmark of any model.
+
+name: support-email-sentiment
+description: Classify a support email as negative, neutral or positive. Mock demo.
+dataset: datasets/support_emails.jsonl
+
+prompts:
+  - id: v1_bare
+    template: |
+      What is the sentiment of this support email?
+
+      {email}
+
+  - id: v2_one_word
+    template: |
+      Classify the sentiment of the support email as negative, neutral or positive.
+      Reply with one lowercase word and nothing else.
+
+      Email:
+      {email}
+
+  - id: v3_defined
+    template: |
+      Classify the sentiment of the support email as negative, neutral or positive.
+      Reply with one lowercase word and nothing else.
+
+      - negative: the customer is unhappy. Sarcasm counts as negative.
+      - positive: the customer is pleased.
+      - neutral: the tone is mixed, or the email is a factual request with no clear feeling.
+
+      Email:
+      {email}
+
+models:
+  - id: mock-careful
+    provider: mock
+    mock:
+      answer_field: sentiment        # the dataset's expected value is an object; answer with this field
+      latency_ms: 20
+      latency_jitter_ms: 20
+      rules:
+        - name: full-sentence-without-format-rule
+          when: { prompt_lacks: "one lowercase word" }
+          behave: prose_wrapped
+          prefix: "The sentiment of this email is "
+          suffix: "."
+        - name: sarcasm-read-literally
+          when: { prompt_lacks: "Sarcasm counts", tags: [sarcasm] }
+          behave: wrong
+          value: positive
+        - name: mixed-tone-read-as-negative
+          when: { prompt_lacks: "tone is mixed", tags: [mixed_sentiment] }
+          behave: wrong
+          value: negative
+
+scorers:
+  - type: exact_match
+    expected_field: sentiment
+  - type: regex
+    name: one_of_three_labels
+    pattern: "^(negative|neutral|positive)$"
+    mode: fullmatch
+  - type: length
+    max_words: 1
+  # Advisory: is the right label somewhere in the answer, even if the format is wrong?
+  # It is reported but does not decide pass or fail.
+  - type: contains
+    name: mentions_right_label
+    expected_field: sentiment
+    required: false
+
+run:
+  concurrency: 4
+
+prices_file: prices.yaml
