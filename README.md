@@ -1,6 +1,6 @@
 # prompt-lab
 
-[![CI](https://github.com/Omkar210404/prompt-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Omkar210404/prompt-lab/actions/workflows/ci.yml)
+[![CI](https://github.com/Omkar210404/Prompt-Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Omkar210404/Prompt-Lab/actions/workflows/ci.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
@@ -39,8 +39,8 @@ Changing a prompt is easy. Knowing whether the change made things better is not.
 Requires Python 3.11 or newer.
 
 ```bash
-git clone https://github.com/Omkar210404/prompt-lab.git
-cd prompt-lab
+git clone https://github.com/Omkar210404/Prompt-Lab.git
+cd Prompt-Lab
 python -m venv .venv
 .venv\Scripts\activate            # Windows.  macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
