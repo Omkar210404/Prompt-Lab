@@ -1,4 +1,4 @@
-# Second demo: classify the sentiment of the same support emails as one plain word.
+# Second demo: classify the sentiment of a support email as one plain word.
 #
 #   prompt-lab run examples/sentiment.yaml --name sentiment
 #
@@ -7,8 +7,8 @@
 # they are not a benchmark of any model.
 
 name: support-email-sentiment
-description: Classify a support email as negative, neutral or positive. Mock demo.
-dataset: datasets/support_emails.jsonl
+description: Decide whether a support email is negative, neutral or positive.
+dataset: datasets/sentiment_emails.jsonl
 
 prompts:
   - id: v1_bare
@@ -41,7 +41,6 @@ models:
   - id: mock-careful
     provider: mock
     mock:
-      answer_field: sentiment        # the dataset's expected value is an object; answer with this field
       latency_ms: 20
       latency_jitter_ms: 20
       rules:
@@ -61,7 +60,6 @@ models:
 
 scorers:
   - type: exact_match
-    expected_field: sentiment
   - type: regex
     name: one_of_three_labels
     pattern: "^(negative|neutral|positive)$"
@@ -72,7 +70,6 @@ scorers:
   # It is reported but does not decide pass or fail.
   - type: contains
     name: mentions_right_label
-    expected_field: sentiment
     required: false
 
 run:

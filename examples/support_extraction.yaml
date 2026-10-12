@@ -9,7 +9,7 @@
 # They show how prompt-lab works. They are not a benchmark of any model.
 
 name: support-email-extraction
-description: Extract order id, category, refund amount and sentiment from a support email as JSON. Mock demo.
+description: Pull the order id, category, refund amount and sentiment out of a support email, as JSON.
 dataset: datasets/support_emails.jsonl
 
 prompts:

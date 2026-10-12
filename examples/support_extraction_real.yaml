@@ -15,7 +15,7 @@
 # No prices are listed for these models, so cost shows as n/a until you add them to a price table.
 
 name: support-email-extraction-real
-description: Extract order id, category, refund amount and sentiment from a support email as JSON, with real models.
+description: Pull the order id, category, refund amount and sentiment out of a support email, as JSON. Uses real AI models.
 dataset: datasets/support_emails.jsonl
 
 prompts:
