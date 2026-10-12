@@ -15,90 +15,111 @@
   --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, Menlo, monospace;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
 .top {
   position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 24px;
   padding: 10px 20px; background: rgba(13, 13, 13, 0.92); border-bottom: 1px solid var(--border); backdrop-filter: blur(6px);
 }
-.brand { font-weight: 700; font-size: 16px; letter-spacing: 0.01em; }
+.brand { font-weight: 700; font-size: 16px; }
 .brand span { color: var(--accent); }
 nav { display: flex; gap: 4px; }
 nav button { background: none; border: 0; color: var(--ink-2); padding: 6px 12px; border-radius: 7px; cursor: pointer; font: inherit; }
 nav button:hover { background: var(--surface-2); }
 nav button[aria-selected="true"] { background: var(--surface-3); color: var(--ink); font-weight: 600; }
-.top .where { margin-left: auto; color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
-main { max-width: 1240px; margin: 0 auto; padding: 22px 16px 80px; }
-h1 { font-size: 22px; margin: 0 0 4px; font-weight: 650; }
-h2 { font-size: 16px; margin: 0 0 4px; font-weight: 650; display: flex; align-items: center; gap: 10px; }
-.step { width: 24px; height: 24px; border-radius: 50%; background: var(--surface-3); color: var(--ink-2); display: inline-grid; place-items: center; font-size: 13px; }
+main { max-width: 1120px; margin: 0 auto; padding: 22px 16px 80px; }
+h1 { font-size: 26px; margin: 0 0 6px; font-weight: 680; line-height: 1.25; }
+h2 { font-size: 18px; margin: 0 0 4px; font-weight: 650; display: flex; align-items: center; gap: 10px; }
+h3 { font-size: 15px; margin: 0; font-weight: 650; }
+.step { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: inline-grid; place-items: center; font-size: 14px; font-weight: 700; flex: none; }
 p { margin: 0; }
-.sub { color: var(--ink-2); }
+.sub { color: var(--ink-2); max-width: 80ch; }
 .muted { color: var(--muted); }
-.note { color: var(--ink-2); font-size: 13px; margin-bottom: 14px; max-width: 105ch; }
-.mono, code, pre, textarea.code { font-family: var(--mono); font-size: 12.5px; }
-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-top: 16px; }
+.help { color: var(--ink-2); margin: 2px 0 14px; max-width: 86ch; }
+.mono, code, pre, textarea.code { font-family: var(--mono); font-size: 13px; }
+code { background: var(--surface-3); border-radius: 4px; padding: 0 5px; }
+section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-top: 16px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.chip { background: var(--surface-3); color: var(--ink-2); border-radius: 999px; padding: 2px 10px; font-size: 12.5px; }
-.banner { margin-top: 14px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--warn); background: rgba(250, 178, 25, 0.10); display: flex; gap: 10px; }
-.banner .icon { color: var(--warn); font-weight: 700; }
-.error { margin-top: 10px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bad); background: rgba(208, 59, 59, 0.12); overflow-wrap: anywhere; }
-label.field { display: block; color: var(--muted); font-size: 12px; margin: 10px 0 4px; }
+.how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 4px; }
+.how div { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; }
+.how b { display: block; margin-bottom: 2px; }
+.how span { color: var(--ink-2); font-size: 14px; }
+@media (max-width: 760px) { .how { grid-template-columns: 1fr; } }
+.facts { color: var(--ink-2); margin-top: 8px; }
+.demo { margin-top: 14px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--warn); background: rgba(250, 178, 25, 0.09); }
+.demo strong { color: var(--warn); }
+.error { margin-top: 12px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--bad); background: rgba(208, 59, 59, 0.12); overflow-wrap: anywhere; }
+label.field { display: block; color: var(--ink-2); font-size: 13.5px; margin: 12px 0 5px; font-weight: 600; }
+label.field small { color: var(--muted); font-weight: 400; }
 input[type="text"], select, textarea {
   width: 100%; background: var(--surface-2); color: var(--ink); border: 1px solid var(--border);
-  border-radius: 7px; padding: 7px 9px; font: inherit;
+  border-radius: 8px; padding: 8px 10px; font: inherit;
 }
 textarea { resize: vertical; line-height: 1.45; }
-select { width: auto; max-width: 100%; }
+select { max-width: 100%; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.btn { font: inherit; display: inline-block; text-decoration: none; border-radius: 7px; padding: 7px 14px; cursor: pointer; border: 1px solid var(--border); background: var(--surface-3); color: var(--ink); }
+.btn { font: inherit; display: inline-block; text-decoration: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--border); background: var(--surface-3); color: var(--ink); }
 .btn:hover { filter: brightness(1.15); }
-.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
-.btn.small { padding: 3px 9px; font-size: 12.5px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 650; padding: 10px 20px; font-size: 15.5px; }
+.btn.small { padding: 3px 10px; font-size: 13px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
 a.link, button.linkish { color: var(--accent); text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
 a.link:hover, button.linkish:hover { text-decoration: underline; }
+details.more { margin-top: 12px; }
+details.more > summary { cursor: pointer; color: var(--muted); font-size: 13.5px; }
+details.more > summary:hover { color: var(--ink-2); }
+details.more .inner { margin-top: 8px; color: var(--ink-2); font-size: 14px; }
 
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
-.card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; min-width: 0; }
 .card-head { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.card-head input { font-family: var(--mono); font-size: 12.5px; font-weight: 600; }
-.edited { color: var(--warn); font-size: 12px; white-space: nowrap; }
-details.sys { margin-top: 8px; }
-details.sys summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
+.card-head input { font-weight: 650; }
+.edited { color: var(--warn); font-size: 12.5px; white-space: nowrap; }
 .models { display: flex; flex-wrap: wrap; gap: 10px; }
-.model { display: flex; gap: 8px; align-items: flex-start; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; max-width: 420px; }
-.model.off { opacity: 0.65; }
-.model small { display: block; color: var(--muted); }
-.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.model { display: flex; gap: 10px; align-items: flex-start; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; max-width: 460px; cursor: pointer; }
+.model.off { opacity: 0.7; cursor: default; }
+.model input { margin-top: 4px; }
+.model small { display: block; color: var(--muted); font-size: 13px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
 @media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
 
-.results { margin-top: 16px; overflow-x: auto; }
+.results { margin-top: 18px; }
 .model-row { margin-top: 14px; }
-.model-row > .name { color: var(--ink-2); font-size: 13px; margin-bottom: 6px; }
-.variants { display: grid; gap: 12px; grid-auto-flow: column; grid-auto-columns: minmax(290px, 1fr); }
-.box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 0; }
-.box h3 { margin: 0 0 4px; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
-.box .label { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; margin: 8px 0 3px; }
-pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 280px; overflow: auto; }
-.verdict { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.model-row > .name { color: var(--ink-2); font-size: 14px; margin-bottom: 6px; }
+.variants { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.box.pass { border-color: rgba(12, 163, 12, 0.55); } .box.fail { border-color: rgba(208, 59, 59, 0.55); }
+.box-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 8px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 11px 2px 4px; font-weight: 650; font-size: 13.5px; white-space: nowrap; }
+.badge.pass { background: rgba(12, 163, 12, 0.18); } .badge.fail { background: rgba(208, 59, 59, 0.2); } .badge.err { background: rgba(250, 178, 25, 0.16); }
+.label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; margin: 10px 0 4px; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 240px; overflow: auto; background: var(--surface); border-radius: 6px; padding: 8px 10px; }
 .dot { width: 18px; height: 18px; flex: none; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; line-height: 1; }
 .dot.pass { background: var(--good); } .dot.fail { background: var(--bad); } .dot.err { background: var(--warn); color: #1a1a19; }
-.reasons { list-style: none; margin: 0; padding: 0; }
-.reasons li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; padding: 3px 0; align-items: start; }
-.reasons .dot { margin-top: 2px; }
+.checks { list-style: none; margin: 0; padding: 0; }
+.checks li { display: grid; grid-template-columns: 18px 1fr; gap: 9px; padding: 4px 0; align-items: start; }
+.checks .dot { margin-top: 2px; }
+.checks .why { display: block; color: var(--ink-2); font-size: 13.5px; }
 
-.progress { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+.winner { margin-top: 18px; padding: 14px 16px; border-radius: 10px; background: rgba(12, 163, 12, 0.12); border: 1px solid rgba(12, 163, 12, 0.5); font-size: 16px; }
+.bars { margin-top: 16px; display: grid; gap: 14px; }
+.bar-row .top-line { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.bar-row .who { font-weight: 650; overflow-wrap: anywhere; }
+.bar-row .who small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+.bar-row .count { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.track { height: 14px; background: var(--grid); border-radius: 0 4px 4px 0; margin-top: 5px; border-left: 1px solid var(--axis); }
+.track i { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.bar-row.best .track i { background: var(--good); }
+.bar-row .problem { color: var(--ink-2); font-size: 13.5px; margin-top: 4px; }
+.progress { height: 10px; background: var(--grid); border-radius: 5px; overflow: hidden; margin-top: 14px; }
 .progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+
 .scroll { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-th { color: var(--muted); font-weight: 500; font-size: 12px; white-space: nowrap; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 13px; white-space: nowrap; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 tbody tr:last-child td { border-bottom: 0; }
-.meter { display: block; height: 4px; background: var(--grid); border-radius: 2px; margin-top: 4px; min-width: 110px; }
-.meter i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
-.down { color: #e66767; } .up { color: #0ca30c; }
+.down { color: #e66767; } .up { color: #2fbf2f; }
 .empty { color: var(--muted); padding: 14px 0; }
 .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--axis); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: -2px; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -109,65 +130,81 @@ tbody tr:last-child td { border-bottom: 0; }
 <div class="top">
   <div class="brand">prompt<span>-lab</span></div>
   <nav role="tablist">
-    <button role="tab" data-tab="lab">Lab</button>
-    <button role="tab" data-tab="runs">Runs</button>
+    <button role="tab" data-tab="lab">Test prompts</button>
+    <button role="tab" data-tab="runs">History</button>
     <button role="tab" data-tab="compare">Compare</button>
   </nav>
-  <div class="where" id="where"></div>
 </div>
 
 <main>
-  <!-- ============ Lab ============ -->
+  <!-- ============ Test prompts ============ -->
   <div id="tab-lab">
     <section>
-      <h1>Test a prompt before you ship it</h1>
-      <p class="sub">Write prompt variants, try them on one input, then run the whole test set and see which variant passes more cases.</p>
-      <label class="field" for="experiment">Experiment</label>
-      <div class="row"><select id="experiment"></select><span class="muted" id="exp-desc"></span></div>
-      <div class="chips" id="exp-chips"></div>
-      <div class="banner" id="mock-banner" hidden>
-        <span class="icon" aria-hidden="true">!</span>
-        <p><strong>Mock models.</strong> The models in this experiment are the scripted mock provider. It does not read your input or generate text: it starts from the expected answer and applies the rules in the experiment file, some of which depend on the wording of your prompt. Results show how prompt-lab works. They are not a benchmark. Add a real model to the experiment file to get real answers.</p>
+      <h1>Find out which prompt works best</h1>
+      <p class="sub">A prompt is the instruction you give an AI. Small changes in wording can change the answers a lot. Here you write a few versions, test them all on the same examples, and see which one gets the most answers right.</p>
+      <div class="how">
+        <div><b>1. Write prompts</b><span>Start from the ready-made versions, or change them.</span></div>
+        <div><b>2. Test them</b><span>Each prompt answers the same examples.</span></div>
+        <div><b>3. See the winner</b><span>Every answer is checked automatically.</span></div>
+      </div>
+
+      <label class="field" for="experiment">What do you want the AI to do?</label>
+      <select id="experiment"></select>
+      <p class="facts" id="exp-facts"></p>
+
+      <div class="demo" id="demo-note" hidden>
+        <p><strong>Demo mode.</strong> The answers here are simulated, so you can try everything without an AI account. They change when you change the wording of a prompt, but they do not read the text you type.</p>
+        <details class="more">
+          <summary>How do I test with a real AI model?</summary>
+          <div class="inner">
+            <p>Pick a task that says <b>real models</b> in the list above. It needs a free API key from Groq. Create a file named <code>.env</code> in the prompt-lab folder with one line, <code>GROQ_API_KEY=your-key</code>, then reload this page. With a real model, the AI reads what you type and writes its own answer.</p>
+          </div>
+        </details>
       </div>
       <div class="error" id="exp-error" hidden></div>
     </section>
 
     <div id="lab-body">
     <section>
-      <h2><span class="step">1</span> Prompts</h2>
-      <p class="note">Each card is one variant. Edit the text, rename it, or add another. <code>{name}</code> is filled in from the input below. Edits live in this page only: they are not written to the experiment file, but a run saves the prompts it used.</p>
+      <h2><span class="step">1</span> Your prompts</h2>
+      <p class="help">Each box is one version of the prompt. Change the wording, or add another version, then test them below. <span id="var-help"></span></p>
       <div class="cards" id="prompts"></div>
       <div class="row" style="margin-top: 12px">
-        <button class="btn" id="add-prompt">+ Add variant</button>
-        <button class="btn" id="reset-prompts">Reset to file</button>
+        <button class="btn" id="add-prompt">+ Add another version</button>
+        <button class="btn" id="reset-prompts">Undo my changes</button>
       </div>
     </section>
 
-    <section>
-      <h2><span class="step">2</span> Models</h2>
-      <p class="note">Every selected model answers every prompt.</p>
+    <section id="models-section">
+      <h2><span class="step">2</span> Which AI answers</h2>
+      <p class="help">Every model you tick answers every prompt, so you can also compare models.</p>
       <div class="models" id="models"></div>
     </section>
 
     <section>
-      <h2><span class="step">3</span> Try one input</h2>
-      <p class="note">Type an input, or load a test case and change it. The expected answer is what the scorers compare against.</p>
+      <h2><span class="step">3</span> Quick test on one example</h2>
+      <p class="help">Pick an example or write your own, then press the button. You will see what each prompt answered and whether it was right.</p>
       <div class="two">
         <div>
-          <label class="field" for="case">Load a test case</label>
+          <label class="field" for="case">Example</label>
           <select id="case"></select>
           <div id="vars"></div>
-          <p class="muted" id="mock-hint" style="margin-top: 6px; font-size: 12.5px" hidden>The selected models are mock models. They do not read this text: their answer is built from the expected answer on the right and the mock rules. Select a real model to have your input answered.</p>
+          <p class="muted" id="mock-hint" style="margin-top: 6px; font-size: 13.5px" hidden>Demo mode: the simulated answer does not depend on this text. Use a real model to have it read.</p>
         </div>
         <div>
-          <label class="field" for="expected">Expected answer (JSON or plain text; leave empty if there is none)</label>
+          <label class="field" for="expected">Correct answer <small>(each reply is checked against this)</small></label>
           <textarea id="expected" class="code" rows="7" spellcheck="false"></textarea>
-          <label class="field" for="tags">Tags (comma separated; the mock rules can depend on them)</label>
-          <input type="text" id="tags">
+          <details class="more">
+            <summary>Advanced</summary>
+            <div class="inner">
+              <label class="field" for="tags" style="margin-top: 0">Labels for this example <small>(comma separated; the demo's simulated mistakes depend on them)</small></label>
+              <input type="text" id="tags">
+            </div>
+          </details>
         </div>
       </div>
-      <div class="row" style="margin-top: 14px">
-        <button class="btn primary" id="try">Run this input</button>
+      <div class="row" style="margin-top: 16px">
+        <button class="btn primary" id="try">Test this example</button>
         <span class="muted" id="try-status"></span>
       </div>
       <div class="error" id="try-error" hidden></div>
@@ -175,14 +212,20 @@ tbody tr:last-child td { border-bottom: 0; }
     </section>
 
     <section>
-      <h2><span class="step">4</span> Run the whole test set</h2>
-      <p class="note" id="plan">&nbsp;</p>
+      <h2><span class="step">4</span> Full test on all examples</h2>
+      <p class="help" id="plan">&nbsp;</p>
       <div class="row">
-        <input type="text" id="run-name" placeholder="Run name (optional), e.g. baseline" style="width: 280px" aria-label="Run name">
-        <label class="row" style="gap: 6px"><input type="checkbox" id="use-cache" checked> Use cached responses</label>
-        <button class="btn primary" id="run-all">Run all cases</button>
+        <button class="btn primary" id="run-all">Run the full test</button>
         <span class="muted" id="run-status"></span>
       </div>
+      <details class="more">
+        <summary>Advanced</summary>
+        <div class="inner">
+          <label class="field" for="run-name" style="margin-top: 0">Name for this test <small>(optional; makes it easy to find in History)</small></label>
+          <input type="text" id="run-name" placeholder="e.g. baseline" style="max-width: 320px">
+          <label class="row" style="gap: 8px; margin-top: 10px"><input type="checkbox" id="use-cache" checked> Reuse answers already saved from earlier tests (faster, and free with a paid model)</label>
+        </div>
+      </details>
       <div class="progress" id="progress" hidden><i></i></div>
       <div class="error" id="run-error" hidden></div>
       <div id="run-results"></div>
@@ -190,24 +233,24 @@ tbody tr:last-child td { border-bottom: 0; }
     </div>
   </div>
 
-  <!-- ============ Runs ============ -->
+  <!-- ============ History ============ -->
   <div id="tab-runs" hidden>
     <section>
-      <h1>Saved runs</h1>
-      <p class="sub">Every run of a whole test set is saved with its prompts, results and config hash.</p>
+      <h1>History</h1>
+      <p class="sub">Every full test is saved here with the prompts it used and all the answers.</p>
       <div class="scroll" style="margin-top: 14px"><table id="runs-table"><thead></thead><tbody></tbody></table></div>
-      <p class="empty" id="runs-empty" hidden>No runs yet. Go to Lab and press "Run all cases".</p>
+      <p class="empty" id="runs-empty" hidden>No tests saved yet. Go to "Test prompts" and press "Run the full test".</p>
     </section>
   </div>
 
   <!-- ============ Compare ============ -->
   <div id="tab-compare" hidden>
     <section>
-      <h1>Compare two runs</h1>
-      <p class="sub">A regression is a case that passed in the earlier run and fails in the later one.</p>
-      <div class="row" style="margin-top: 14px">
-        <label class="row" style="gap: 6px">A (before) <select id="cmp-a"></select></label>
-        <label class="row" style="gap: 6px">B (after) <select id="cmp-b"></select></label>
+      <h1>Compare two tests</h1>
+      <p class="sub">Changed a prompt? Compare the test from before with the test from after to see which examples got better and which got worse.</p>
+      <div class="row" style="margin-top: 16px">
+        <label class="row" style="gap: 8px">Before <select id="cmp-a"></select></label>
+        <label class="row" style="gap: 8px">After <select id="cmp-b"></select></label>
         <button class="btn primary" id="cmp-go">Compare</button>
       </div>
       <div class="error" id="cmp-error" hidden></div>
@@ -235,11 +278,32 @@ tbody tr:last-child td { border-bottom: 0; }
   }
   function clear(node) { node.textContent = ""; return node; }
   function show(value) { return typeof value === "string" ? value : JSON.stringify(value, null, 2); }
-  function pct(v) { return v === null || v === undefined ? "n/a" : (v * 100).toFixed(1) + "%"; }
-  function cost(v) { return v === null || v === undefined ? "n/a" : v === 0 ? "$0" : v < 0.01 ? "$" + v.toFixed(6) : "$" + v.toFixed(4); }
+  function pct(v) { return v === null || v === undefined ? "n/a" : Math.round(v * 100) + "%"; }
+  function cost(v) { return v === null || v === undefined ? "not known" : v === 0 ? "$0" : v < 0.01 ? "$" + v.toFixed(6) : "$" + v.toFixed(4); }
   function ms(v) { return v === null || v === undefined ? "n/a" : (v < 10 ? v.toFixed(1) : v.toFixed(0)) + " ms"; }
-  function when(iso) { return iso.replace("T", " ").replace("+00:00", " UTC"); }
+  function when(iso) { return iso.slice(0, 16).replace("T", " ") + " UTC"; }
+  function plural(n, word) { return n + " " + word + (n === 1 ? "" : "s"); }
+  function words(id) { return id.replace(/[-_]+/g, " "); }
+  function title(id) { var text = words(id); return text.charAt(0).toUpperCase() + text.slice(1); }
   function setError(id, message) { var box = $(id); box.hidden = !message; box.textContent = message || ""; }
+
+  // Plain-language names for the automatic checks. The technical name stays in the full report.
+  var CHECKS = {
+    exact_match: "Exactly the right answer",
+    contains: "Includes the required text",
+    not_contains: "Avoids the forbidden text",
+    regex: "Has the right format",
+    length: "Is the right length",
+    json_valid: "Is valid JSON (a program can read it)",
+    json_schema: "Has the right fields and types",
+    json_fields: "Values match the correct answer",
+    numeric: "The number is correct",
+    llm_judge: "A second AI judged it acceptable"
+  };
+  function checkName(score) {
+    var custom = score.scorer && score.scorer.replace(/#\d+$/, "") !== score.type;
+    return custom ? title(score.scorer) : (CHECKS[score.type] || title(score.type || score.scorer));
+  }
 
   async function api(path, body) {
     var options = body === undefined ? {} : {
@@ -279,23 +343,26 @@ tbody tr:last-child td { border-bottom: 0; }
     });
     if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
     if (name === "runs" || name === "compare") loadRuns();
+    window.scrollTo(0, 0);
   }
   document.querySelectorAll("nav button").forEach(function (button) {
     button.addEventListener("click", function () { showTab(button.getAttribute("data-tab")); });
   });
   window.addEventListener("hashchange", function () { showTab(location.hash.slice(1)); });
 
-  // ---------- experiment ----------
+  // ---------- task (experiment) ----------
   async function loadExperiments() {
     var list = await api("/api/experiments");
     var select = clear($("experiment"));
     if (!list.length) {
       $("lab-body").hidden = true;
-      setError("exp-error", "No experiment files found here. Run \"prompt-lab init\" in this folder, or start the app from a folder that has an experiment YAML file.");
+      setError("exp-error", "No task files found in this folder. Run \"prompt-lab init\" here, or start the app from a folder that has an experiment YAML file.");
       return;
     }
     list.forEach(function (item) {
-      var option = el("option", null, item.error ? item.id + " (cannot load)" : item.name + "  ·  " + item.id);
+      var text = item.error ? item.id + " (cannot be opened)"
+        : title(item.name) + (item.mock ? "  (demo)" : "  (real models)") + "  —  " + item.id;
+      var option = el("option", null, text);
       option.value = item.id;
       select.appendChild(option);
     });
@@ -313,23 +380,20 @@ tbody tr:last-child td { border-bottom: 0; }
       state.exp = await api("/api/experiment?id=" + encodeURIComponent(id));
     } catch (error) {
       state.exp = null;
-      $("lab-body").hidden = true;
-      $("mock-banner").hidden = true;
-      clear($("exp-chips")); $("exp-desc").textContent = "";
-      setError("exp-error", "This experiment file cannot be loaded: " + error.message);
+      $("lab-body").hidden = true; $("demo-note").hidden = true; $("exp-facts").textContent = "";
+      setError("exp-error", "This task file cannot be opened: " + error.message);
       return;
     }
     try { localStorage.setItem("promptlab.experiment", id); } catch (e) { /* storage unavailable */ }
     var exp = state.exp;
     $("lab-body").hidden = false;
-    $("exp-desc").textContent = exp.description || "";
-    var chips = clear($("exp-chips"));
-    add(chips,
-      el("span", "chip", exp.dataset.cases + " test cases" + (exp.dataset.synthetic ? " (synthetic)" : "")),
-      el("span", "chip", "scorers: " + exp.scorers.map(function (s) { return s.name + (s.required ? "" : " (advisory)"); }).join(", ")),
-      el("span", "chip mono", "config " + exp.config_hash.slice(0, 8)));
-    exp.warnings.forEach(function (w) { chips.appendChild(el("span", "chip", "Warning: " + w)); });
-    $("mock-banner").hidden = !exp.models.some(function (m) { return m.provider === "mock"; });
+    var facts = clear($("exp-facts"));
+    if (exp.description) add(facts, document.createTextNode(exp.description + " "));
+    var required = exp.scorers.filter(function (s) { return s.required; }).length;
+    add(facts, el("span", "muted", plural(exp.dataset.cases, "example") + (exp.dataset.synthetic ? " (made up for the demo)" : "") +
+      ", " + plural(required, "automatic check") + " on every answer."));
+    exp.warnings.forEach(function (w) { facts.appendChild(el("div", "muted", "Note: " + w)); });
+    $("demo-note").hidden = !exp.models.every(function (m) { return m.provider === "mock"; });
 
     state.prompts = exp.prompts.map(function (p) { return { id: p.id, template: p.template, system: p.system || "" }; });
     state.models = {};
@@ -356,28 +420,29 @@ tbody tr:last-child td { border-bottom: 0; }
       var card = el("div", "card");
       var head = el("div", "card-head");
       var idInput = el("input"); idInput.type = "text"; idInput.value = prompt.id;
-      idInput.setAttribute("aria-label", "Variant name");
-      var badge = el("span", "edited", isEdited(prompt) ? "edited" : "");
+      idInput.setAttribute("aria-label", "Name of this version");
+      var badge = el("span", "edited", isEdited(prompt) ? "changed" : "");
       idInput.addEventListener("input", function () {
-        prompt.id = idInput.value.trim(); badge.textContent = isEdited(prompt) ? "edited" : ""; schedulePlan();
+        prompt.id = idInput.value.trim(); badge.textContent = isEdited(prompt) ? "changed" : ""; schedulePlan();
       });
       var remove = el("button", "btn small", "Remove"); remove.type = "button";
       remove.disabled = state.prompts.length === 1;
       remove.addEventListener("click", function () { state.prompts.splice(index, 1); renderPrompts(); renderVars(); schedulePlan(); });
       add(head, idInput, badge, remove);
 
-      var template = el("textarea", "code"); template.rows = 13; template.spellcheck = false; template.value = prompt.template;
-      template.setAttribute("aria-label", "Prompt template for " + prompt.id);
+      var template = el("textarea", "code"); template.rows = 9; template.spellcheck = false; template.value = prompt.template;
+      template.setAttribute("aria-label", "Prompt text for " + prompt.id);
       template.addEventListener("input", function () {
-        prompt.template = template.value; badge.textContent = isEdited(prompt) ? "edited" : ""; renderVars(); schedulePlan();
+        prompt.template = template.value; badge.textContent = isEdited(prompt) ? "changed" : ""; renderVars(); schedulePlan();
       });
 
-      var sys = el("details", "sys"); if (prompt.system) sys.open = true;
-      sys.appendChild(el("summary", null, "System prompt (optional)"));
+      var sys = el("details", "more"); if (prompt.system) sys.open = true;
+      sys.appendChild(el("summary", null, "Advanced: system prompt"));
       var system = el("textarea", "code"); system.rows = 3; system.spellcheck = false; system.value = prompt.system;
+      system.style.marginTop = "8px";
       system.setAttribute("aria-label", "System prompt for " + prompt.id);
       system.addEventListener("input", function () {
-        prompt.system = system.value; badge.textContent = isEdited(prompt) ? "edited" : ""; renderVars(); schedulePlan();
+        prompt.system = system.value; badge.textContent = isEdited(prompt) ? "changed" : ""; renderVars(); schedulePlan();
       });
       sys.appendChild(system);
       add(card, head, template, sys);
@@ -404,9 +469,9 @@ tbody tr:last-child td { border-bottom: 0; }
       var box = el("input"); box.type = "checkbox"; box.checked = !!state.models[model.id]; box.disabled = !model.available;
       box.addEventListener("change", function () { state.models[model.id] = box.checked; updateMockHint(); schedulePlan(); });
       var text = el("span");
-      add(text, el("strong", "mono", model.id),
-        el("small", null, model.provider === "mock" ? "mock provider (scripted, offline)" : model.provider + " · " + model.model),
-        model.available ? null : el("small", null, "Not available: " + model.problem));
+      add(text, el("strong", null, model.id),
+        el("small", null, model.provider === "mock" ? "Demo model: simulated answers, works offline" : "Real model: " + model.model),
+        model.available ? null : el("small", null, "Not ready yet: its API key is not set. See \"How do I test with a real AI model?\" at the top, or the README."));
       add(label, box, text);
       holder.appendChild(label);
     });
@@ -427,15 +492,27 @@ tbody tr:last-child td { border-bottom: 0; }
       use_cache: $("use-cache").checked
     };
   }
+  function needModel(errorId) {
+    if (selectedModels().length) return true;
+    setError(errorId, state.exp.models.some(function (m) { return m.available; })
+      ? "Tick at least one model in step 2."
+      : "No model is ready. This task uses real AI models and their API key is not set yet. Pick a demo task at the top to try the app without a key.");
+    return false;
+  }
 
-  // ---------- 3. try one input ----------
+  // ---------- 3. quick test on one example ----------
+  function firstText(c) {
+    var keys = Object.keys(c.vars);
+    var text = keys.length ? show(c.vars[keys[0]]) : "";
+    return text.length > 62 ? text.slice(0, 60) + "…" : text;
+  }
   function renderCases() {
     var select = clear($("case"));
-    var custom = el("option", null, "Custom input (nothing loaded)"); custom.value = ""; select.appendChild(custom);
-    state.exp.cases.forEach(function (c) {
-      var option = el("option", null, c.id + (c.tags.length ? "  ·  " + c.tags.join(", ") : "")); option.value = c.id;
+    state.exp.cases.forEach(function (c, index) {
+      var option = el("option", null, "Example " + (index + 1) + ":  " + firstText(c)); option.value = c.id;
       select.appendChild(option);
     });
+    var custom = el("option", null, "Write my own (start empty)"); custom.value = ""; select.appendChild(custom);
     var first = state.exp.cases[0];
     if (first) { select.value = first.id; loadCase(first); } else { loadCase(null); }
   }
@@ -461,12 +538,17 @@ tbody tr:last-child td { border-bottom: 0; }
     var holder = $("vars"), names = neededVars();
     var focused = document.activeElement && document.activeElement.getAttribute("data-var");
     clear(holder);
-    if (!names.length) { holder.appendChild(el("p", "empty", "These prompts use no {variables}, so there is nothing to type.")); return; }
+    var help = clear($("var-help"));
+    if (names.length) {
+      add(help, document.createTextNode("Where a prompt says "), el("code", null, "{" + names[0] + "}"),
+        document.createTextNode(", the " + words(names[0]) + " from the example is put in."));
+    }
+    if (!names.length) { holder.appendChild(el("p", "empty", "These prompts have no {placeholder}, so there is nothing to type here.")); return; }
     names.forEach(function (name) {
-      var label = el("label", "field", "Input: " + name); label.setAttribute("for", "var-" + name);
+      var label = el("label", "field", title(name)); label.setAttribute("for", "var-" + name);
       var area = el("textarea"); area.id = "var-" + name; area.rows = 5; area.value = state.vars[name] || "";
       area.setAttribute("data-var", name);
-      area.placeholder = "Type or paste the " + name + " here";
+      area.placeholder = "Type or paste the " + words(name) + " here";
       area.addEventListener("input", function () { state.vars[name] = area.value; });
       add(holder, label, area);
     });
@@ -478,45 +560,48 @@ tbody tr:last-child td { border-bottom: 0; }
     try { return JSON.parse(text); } catch (e) { return text; }
   }
 
-  function verdict(row) {
-    var wrap = el("span", "verdict");
+  function badge(row) {
     var kind = row.status === "error" ? "err" : row.passed ? "pass" : "fail";
+    var wrap = el("span", "badge " + kind);
     var dot = el("span", "dot " + kind, kind === "pass" ? "✓" : kind === "fail" ? "✕" : "!");
     dot.setAttribute("aria-hidden", "true");
-    add(wrap, dot, document.createTextNode(kind === "err" ? "error" : (kind === "pass" ? "pass " : "fail ") + row.score.toFixed(2)));
+    add(wrap, dot, document.createTextNode(kind === "err" ? "Could not answer" : kind === "pass" ? "Passed" : "Failed"));
     return wrap;
   }
   function resultBox(row) {
-    var box = el("div", "box");
-    var head = el("h3");
-    add(head, el("span", "mono", row.prompt_id), verdict(row));
+    var box = el("div", "box " + (row.status === "error" ? "" : row.passed ? "pass" : "fail"));
+    var head = el("div", "box-head");
+    add(head, el("h3", null, row.prompt_id), badge(row));
     box.appendChild(head);
-    var meta = [ms(row.latency_ms)];
-    if (row.usage) meta.push(row.usage.prompt_tokens + " in / " + row.usage.completion_tokens + " out tokens");
-    if (row.cost_usd !== null && row.cost_usd !== undefined) meta.push("est. " + cost(row.cost_usd));
-    if (row.cached) meta.push("from cache");
-    if (row.attempts > 1) meta.push(row.attempts + " attempts");
-    box.appendChild(el("div", "muted", meta.join(" · ")));
     if (row.status === "error") {
-      box.appendChild(el("div", "label", "Call error"));
-      box.appendChild(el("pre", null, row.error.type + ": " + row.error.message));
+      box.appendChild(el("div", "label", "What went wrong"));
+      box.appendChild(el("pre", null, row.error.message));
       return box;
     }
-    box.appendChild(el("div", "label", "Output"));
-    box.appendChild(el("pre", null, row.output === "" ? "(empty output)" : row.output));
-    box.appendChild(el("div", "label", "Scores"));
-    var list = el("ul", "reasons");
+    box.appendChild(el("div", "label", "The AI's answer"));
+    box.appendChild(el("pre", null, row.output === "" ? "(the answer was empty)" : row.output));
+    box.appendChild(el("div", "label", "Checks"));
+    var list = el("ul", "checks");
     row.scores.forEach(function (s) {
       var kind = s.error ? "err" : s.passed ? "pass" : "fail";
       var item = el("li");
       var dot = el("span", "dot " + kind, kind === "pass" ? "✓" : kind === "fail" ? "✕" : "!");
-      dot.setAttribute("aria-label", kind === "pass" ? "passed" : kind === "fail" ? "failed" : "scorer error");
-      var text = el("span");
-      add(text, el("strong", null, s.scorer + (s.required ? "" : " (advisory)")), document.createTextNode(" " + s.reason));
+      dot.setAttribute("aria-label", kind === "pass" ? "passed" : kind === "fail" ? "failed" : "could not be checked");
+      var text = el("span", null, checkName(s) + (s.required ? "" : " (extra info, does not count)"));
+      if (!s.passed) text.appendChild(el("span", "why", s.reason));
       add(item, dot, text);
       list.appendChild(item);
     });
     box.appendChild(list);
+    var more = el("details", "more");
+    more.appendChild(el("summary", null, "Details"));
+    var facts = ["Took " + ms(row.latency_ms)];
+    if (row.usage) facts.push(row.usage.prompt_tokens + " tokens in, " + row.usage.completion_tokens + " out");
+    facts.push("estimated cost " + cost(row.cost_usd));
+    if (row.cached) facts.push("reused a saved answer");
+    if (row.attempts > 1) facts.push(row.attempts + " attempts");
+    more.appendChild(el("div", "inner", facts.join(" · ")));
+    box.appendChild(more);
     return box;
   }
   function renderTryResults(rows) {
@@ -525,7 +610,7 @@ tbody tr:last-child td { border-bottom: 0; }
     rows.forEach(function (r) { if (models.indexOf(r.model_id) < 0) models.push(r.model_id); });
     models.forEach(function (modelId) {
       var block = el("div", "model-row");
-      block.appendChild(el("div", "name", "Model: " + modelId));
+      if (models.length > 1) block.appendChild(el("div", "name", "Answers from " + modelId));
       var grid = el("div", "variants");
       rows.filter(function (r) { return r.model_id === modelId; }).forEach(function (r) { grid.appendChild(resultBox(r)); });
       block.appendChild(grid);
@@ -534,91 +619,123 @@ tbody tr:last-child td { border-bottom: 0; }
   }
   $("try").addEventListener("click", async function () {
     setError("try-error", "");
-    if (!selectedModels().length) { setError("try-error", "Select at least one model."); return; }
+    if (!needModel("try-error")) return;
     var body = selection();
     body.vars = {};
     neededVars().forEach(function (name) { body.vars[name] = state.vars[name] || ""; });
     body.expected = expectedValue();
     body.tags = $("tags").value.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
     var button = $("try"), status = clear($("try-status"));
-    button.disabled = true; add(status, el("span", "spin"), document.createTextNode("Running..."));
+    button.disabled = true; add(status, el("span", "spin"), document.createTextNode("Testing..."));
     try {
       var data = await api("/api/try", body);
       renderTryResults(data.rows);
       var passed = data.rows.filter(function (r) { return r.passed; }).length;
-      clear(status).textContent = passed + " of " + data.rows.length + " passed";
+      clear(status).textContent = passed + " of " + plural(data.rows.length, "answer") + " passed";
     } catch (error) {
       clear(status); clear($("try-results")); setError("try-error", error.message);
     } finally { button.disabled = false; }
   });
 
-  // ---------- 4. run the whole test set ----------
+  // ---------- 4. full test ----------
   var planTimer = null;
   function schedulePlan() { clearTimeout(planTimer); planTimer = setTimeout(updatePlan, 350); }
   async function updatePlan() {
     if (!state.exp) return;
     var line = $("plan");
-    if (!selectedModels().length) { line.textContent = "Select at least one model."; return; }
+    if (!selectedModels().length) { line.textContent = "Tick at least one model in step 2 to run the full test."; return; }
     try {
       var plan = await api("/api/plan", selection());
-      line.textContent = plan.prompts + " prompts × " + plan.models + " models × " + plan.cases + " cases = " +
-        plan.total + " calls. " + plan.cached + " already cached, " + plan.to_call + " to make.";
+      var text = "Runs " + plural(plan.prompts, "prompt") + (plan.models > 1 ? " and " + plural(plan.models, "model") : "") +
+        " on all " + plural(plan.cases, "example") + ": " + plural(plan.total, "answer") + " to check.";
+      if (plan.cached) text += plan.to_call ? " " + plan.cached + " are already saved from earlier, so only " + plan.to_call + " are new."
+        : " All of them are already saved from earlier, so this is instant.";
+      line.textContent = text;
       setError("run-error", "");
     } catch (error) {
-      line.textContent = "This cannot run yet:";
+      line.textContent = "The full test cannot run yet:";
       setError("run-error", error.message);
     }
   }
   $("use-cache").addEventListener("change", schedulePlan);
 
-  function summaryTable(summary) {
-    var wrap = el("div", "scroll");
-    var table = el("table"), head = el("tr");
-    ["Prompt", "Model"].forEach(function (h) { head.appendChild(el("th", null, h)); });
-    ["Pass rate", "Passed", "Mean score", "Errors", "p50 latency", "Est. cost"].forEach(function (h) { head.appendChild(el("th", "num", h)); });
-    add(table, add(el("thead"), head));
-    var body = el("tbody");
-    summary.groups.forEach(function (g) {
-      var tr = el("tr");
-      add(tr, el("td", "mono", g.prompt_id), el("td", "mono", g.model_id));
-      var rate = el("td", "num", pct(g.pass_rate));
-      var meter = el("span", "meter"), fill = el("i"); fill.style.width = ((g.pass_rate || 0) * 100).toFixed(1) + "%";
-      meter.appendChild(fill); rate.appendChild(meter);
-      add(tr, rate, el("td", "num", g.passed + "/" + g.cases), el("td", "num", g.mean_score.toFixed(3)),
-        el("td", "num", String(g.errors)), el("td", "num", ms(g.latency_ms_p50)), el("td", "num", cost(g.cost_usd)));
-      body.appendChild(tr);
+  function typeOfCheck(name) {
+    var found = state.exp && state.exp.scorers.filter(function (s) { return s.name === name; })[0];
+    return found ? found.type : name;
+  }
+  function biggestProblem(summary, group) {
+    // The check this prompt fails most often, in plain words.
+    var worst = null;
+    summary.scorers.forEach(function (s) {
+      if (s.prompt_id !== group.prompt_id || s.model_id !== group.model_id || s.passed === s.cases) return;
+      if (!worst || s.passed < worst.passed) worst = s;
     });
-    table.appendChild(body); wrap.appendChild(table);
-    return wrap;
+    if (!worst) return null;
+    var name = checkName({ scorer: worst.scorer, type: typeOfCheck(worst.scorer) });
+    return "Most common problem: \"" + name + "\" failed on " + (worst.cases - worst.passed) + " of " + worst.cases + ".";
+  }
+  function resultBars(summary) {
+    var manyModels = summary.models.length > 1;
+    var best = summary.groups.slice().sort(function (a, b) { return b.pass_rate - a.pass_rate || b.mean_score - a.mean_score; })[0];
+    var holder = el("div");
+
+    var winner = el("div", "winner");
+    var tied = summary.groups.filter(function (g) { return g.pass_rate === best.pass_rate; }).length > 1;
+    if (!best.passed) {
+      winner.appendChild(el("strong", null, "No prompt got an example fully right yet. Look at the problems below and try changing the wording."));
+    } else {
+      add(winner, el("strong", null, (tied ? "Joint best: " : "Best: ") + best.prompt_id + (manyModels ? " with " + best.model_id : "")),
+        document.createTextNode(" — got " + best.passed + " of " + plural(best.cases, "example") + " right (" + pct(best.pass_rate) + ")."));
+    }
+    holder.appendChild(winner);
+
+    var bars = el("div", "bars");
+    summary.groups.forEach(function (g) {
+      var row = el("div", "bar-row" + (g === best ? " best" : ""));
+      var line = el("div", "top-line");
+      var who = el("span", "who", g.prompt_id);
+      if (manyModels) who.appendChild(el("small", null, g.model_id));
+      add(line, who, el("span", "count", g.passed + " of " + g.cases + " right  ·  " + pct(g.pass_rate)));
+      var track = el("div", "track"), fill = el("i"); fill.style.width = ((g.pass_rate || 0) * 100).toFixed(1) + "%";
+      track.appendChild(fill);
+      add(row, line, track);
+      var problem = g.errors ? plural(g.errors, "answer") + " could not be fetched (see the full report)." : biggestProblem(summary, g);
+      if (problem) row.appendChild(el("div", "problem", problem));
+      bars.appendChild(row);
+    });
+    holder.appendChild(bars);
+    return holder;
   }
   async function showRunResult(runId) {
     var summary = await api("/api/runs/" + encodeURIComponent(runId));
     var holder = clear($("run-results"));
-    var totals = summary.totals;
-    var head = el("p", null, "");
-    head.style.margin = "16px 0 8px";
-    add(head, el("strong", null, "Run " + runId + ": "),
-      document.createTextNode(totals.passed + " of " + totals.cases + " cells passed, " + totals.errors + " call errors. " +
-        (totals.cases - totals.cached) + " calls made, " + totals.cached + " from cache. Estimated cost " + cost(totals.cost_usd) + "."));
-    holder.appendChild(head);
-    holder.appendChild(summaryTable(summary));
-    var actions = el("div", "row"); actions.style.marginTop = "12px";
-    var report = el("a", "btn primary", "Open full report"); report.href = "/runs/" + encodeURIComponent(runId) + "/report";
+    holder.appendChild(resultBars(summary));
+
+    var actions = el("div", "row"); actions.style.marginTop = "18px";
+    var report = el("a", "btn", "See every example and answer"); report.href = "/runs/" + encodeURIComponent(runId) + "/report";
     actions.appendChild(report);
     await loadRuns();
     var others = state.runs.filter(function (r) { return r.run_id !== runId; });
     if (others.length) {
-      var select = el("select"); select.setAttribute("aria-label", "Earlier run to compare with");
+      var select = el("select"); select.style.width = "auto"; select.setAttribute("aria-label", "Earlier test to compare with");
       others.forEach(function (r) { var o = el("option", null, r.run_id); o.value = r.run_id; select.appendChild(o); });
-      var go = el("button", "btn", "Compare with this earlier run"); go.type = "button";
+      var go = el("button", "btn", "Compare with this earlier test"); go.type = "button";
       go.addEventListener("click", function () { openCompare(select.value, runId); });
-      add(actions, select, go);
+      add(actions, go, select);
     }
     holder.appendChild(actions);
+
+    var totals = summary.totals;
+    var more = el("details", "more");
+    more.appendChild(el("summary", null, "Details"));
+    more.appendChild(el("div", "inner", "Saved as \"" + runId + "\". " + (totals.cases - totals.cached) + " new answers, " +
+      totals.cached + " reused. Estimated cost " + cost(totals.cost_usd) +
+      (summary.mock_models.length ? " (demo prices, not real)." : ".")));
+    holder.appendChild(more);
   }
   $("run-all").addEventListener("click", async function () {
     setError("run-error", "");
-    if (!selectedModels().length) { setError("run-error", "Select at least one model."); return; }
+    if (!needModel("run-error")) return;
     var body = selection(); body.name = $("run-name").value;
     var button = $("run-all"), status = $("run-status"), bar = $("progress");
     button.disabled = true; clear($("run-results"));
@@ -627,13 +744,13 @@ tbody tr:last-child td { border-bottom: 0; }
       bar.hidden = false;
       while (job.status === "running") {
         bar.firstElementChild.style.width = (job.total ? (job.done / job.total) * 100 : 0) + "%";
-        status.textContent = job.done + " / " + job.total + " cells";
+        status.textContent = job.done + " of " + job.total + " answers checked";
         await new Promise(function (resolve) { setTimeout(resolve, 250); });
         job = await api("/api/jobs/" + job.id);
       }
       bar.firstElementChild.style.width = "100%";
       if (job.status === "error") throw new Error(job.error);
-      status.textContent = "Done";
+      status.textContent = "Finished";
       await showRunResult(job.run_id);
       schedulePlan();
     } catch (error) {
@@ -641,25 +758,24 @@ tbody tr:last-child td { border-bottom: 0; }
     } finally { button.disabled = false; setTimeout(function () { bar.hidden = true; }, 600); }
   });
 
-  // ---------- Runs ----------
+  // ---------- History ----------
   async function loadRuns() {
     state.runs = await api("/api/runs");
     var table = $("runs-table"), head = clear(table.querySelector("thead")), body = clear(table.querySelector("tbody"));
     $("runs-empty").hidden = state.runs.length > 0;
     table.hidden = state.runs.length === 0;
     var tr = el("tr");
-    ["Run", "Experiment", "Started"].forEach(function (h) { tr.appendChild(el("th", null, h)); });
-    ["Cells", "Pass rate", "Est. cost"].forEach(function (h) { tr.appendChild(el("th", "num", h)); });
-    add(tr, el("th", null, "Models"), el("th", null, ""));
+    ["Test", "Task", "When"].forEach(function (h) { tr.appendChild(el("th", null, h)); });
+    add(tr, el("th", "num", "Answers right"), el("th", null, "Kind"), el("th", null, ""));
     head.appendChild(tr);
     state.runs.forEach(function (run) {
       var row = el("tr");
-      add(row, el("td", "mono", run.run_id), el("td", null, run.experiment), el("td", null, when(run.started_at)),
-        el("td", "num", String(run.cells) + (run.partial ? " (partial)" : "")), el("td", "num", pct(run.pass_rate)),
-        el("td", "num", cost(run.cost_usd)), el("td", null, run.mock ? "mock" : "real"));
+      add(row, el("td", null, run.run_id), el("td", null, title(run.experiment)), el("td", null, when(run.started_at)),
+        el("td", "num", run.passed + " of " + run.cells + "  ·  " + pct(run.pass_rate)),
+        el("td", null, (run.mock ? "demo" : "real models") + (run.partial ? ", partial" : "")));
       var actions = el("td");
-      var report = el("a", "link", "Report"); report.href = "/runs/" + encodeURIComponent(run.run_id) + "/report";
-      var compare = el("button", "linkish", "Compare"); compare.type = "button"; compare.style.marginLeft = "14px";
+      var report = el("a", "link", "Open"); report.href = "/runs/" + encodeURIComponent(run.run_id) + "/report";
+      var compare = el("button", "linkish", "Compare"); compare.type = "button"; compare.style.marginLeft = "16px";
       compare.addEventListener("click", function () {
         var earlier = state.runs.filter(function (r) { return r.started_at < run.started_at; })[0];
         openCompare(earlier ? earlier.run_id : run.run_id, run.run_id);
@@ -678,7 +794,7 @@ tbody tr:last-child td { border-bottom: 0; }
       clear(select);
       state.runs.forEach(function (run) { var o = el("option", null, run.run_id); o.value = run.run_id; select.appendChild(o); });
       if (current && state.runs.some(function (r) { return r.run_id === current; })) select.value = current;
-      else if (state.runs.length > 1) select.value = state.runs[index === 0 ? 1 : 0].run_id;  // A = previous, B = newest
+      else if (state.runs.length > 1) select.value = state.runs[index === 0 ? 1 : 0].run_id;  // before = previous, after = newest
     });
   }
   async function openCompare(a, b) {
@@ -687,18 +803,18 @@ tbody tr:last-child td { border-bottom: 0; }
     $("cmp-a").value = a; $("cmp-b").value = b;
     runCompare();
   }
-  function changesTable(title, changes, whyHeader) {
+  function changesTable(heading, help, changes) {
     var section = el("section");
-    section.appendChild(el("h2", null, title + " (" + changes.length + ")"));
-    var wrap = el("div", "scroll"); wrap.style.marginTop = "10px";
+    section.appendChild(el("h2", null, heading));
+    section.appendChild(el("p", "help", help));
+    var wrap = el("div", "scroll");
     var table = el("table"), head = el("tr");
-    add(head, el("th", null, "Case"), el("th", null, "Prompt"), el("th", null, "Model"), el("th", "num", "Score A → B"), el("th", null, whyHeader));
+    add(head, el("th", null, "Example"), el("th", null, "Prompt"), el("th", null, "Model"), el("th", null, "What went wrong"));
     add(table, add(el("thead"), head));
     var body = el("tbody");
     changes.forEach(function (c) {
       var tr = el("tr");
-      add(tr, el("td", "mono", c.case_id), el("td", "mono", c.prompt_id), el("td", "mono", c.model_id),
-        el("td", "num", c.score_a.toFixed(2) + " → " + c.score_b.toFixed(2)));
+      add(tr, el("td", null, c.case_id), el("td", null, c.prompt_id), el("td", null, c.model_id));
       var why = el("td");
       c.reasons.forEach(function (r) { why.appendChild(el("div", null, r)); });
       tr.appendChild(why); body.appendChild(tr);
@@ -710,57 +826,55 @@ tbody tr:last-child td { border-bottom: 0; }
     setError("cmp-error", "");
     var out = clear($("cmp-out"));
     var a = $("cmp-a").value, b = $("cmp-b").value;
-    if (!a || !b) { setError("cmp-error", "You need two saved runs to compare. Run the test set twice from the Lab tab."); return; }
+    if (!a || !b) { setError("cmp-error", "You need two saved tests to compare. Run the full test twice from \"Test prompts\"."); return; }
     var data;
     try { data = await api("/api/compare?a=" + encodeURIComponent(a) + "&b=" + encodeURIComponent(b)); }
     catch (error) { setError("cmp-error", error.message); return; }
     var counts = data.counts;
 
     var top = el("section");
-    var verdictLine = el("h2", null, counts.regressions + " regressions, " + counts.fixes + " fixes");
-    top.appendChild(verdictLine);
-    top.appendChild(el("p", "note", "Compared " + counts.compared + " cells present in both runs: " + counts.still_passing +
-      " still passing, " + counts.still_failing + " still failing." +
-      (counts.only_in_a || counts.only_in_b ? " Not compared: " + counts.only_in_a + " only in A, " + counts.only_in_b + " only in B." : "")));
+    top.appendChild(el("h2", null, plural(counts.regressions, "answer") + " got worse, " + counts.fixes + " got better"));
+    var same = counts.still_passing + counts.still_failing;
+    top.appendChild(el("p", "help", same + " stayed the same (" + counts.still_passing + " still right, " + counts.still_failing + " still wrong)." +
+      (counts.only_in_a || counts.only_in_b ? " " + (counts.only_in_a + counts.only_in_b) + " could not be compared because only one test has them." : "")));
     var edits = [];
-    if (data.changed_prompts.length) edits.push("prompts changed: " + data.changed_prompts.join(", "));
-    if (data.changed_models.length) edits.push("models changed: " + data.changed_models.join(", "));
-    if (data.changed_scorers) edits.push("scorers changed");
-    top.appendChild(el("p", "sub", data.same_config ? "Same config hash: any difference comes from the models, not from your files."
-      : edits.length ? "Between A and B: " + edits.join("; ") + "." : "The two runs have different configs."));
+    if (data.changed_prompts.length) edits.push("these prompts were changed: " + data.changed_prompts.join(", "));
+    if (data.changed_models.length) edits.push("the models were changed");
+    if (data.changed_scorers) edits.push("the checks were changed");
+    top.appendChild(el("p", "sub", data.same_config ? "Both tests used exactly the same prompts, models and checks."
+      : edits.length ? "Between the two tests, " + edits.join("; ") + "." : "The two tests used different settings."));
     if (data.run_a.mock_models.length || data.run_b.mock_models.length) {
-      var banner = el("div", "banner");
-      add(banner, el("span", "icon", "!"), el("p", null, "Mock results. These outputs come from the scripted mock provider, not from a real model. They are not a benchmark."));
-      top.appendChild(banner);
+      var note = el("div", "demo");
+      add(note, el("strong", null, "Demo mode. "), document.createTextNode("These answers were simulated, not written by a real AI model."));
+      top.appendChild(note);
     }
-    data.warnings.forEach(function (w) { top.appendChild(el("div", "error", "Warning: " + w)); });
+    data.warnings.forEach(function (w) { top.appendChild(el("div", "error", "Note: " + w)); });
 
-    var wrap = el("div", "scroll"); wrap.style.marginTop = "14px";
+    var wrap = el("div", "scroll"); wrap.style.marginTop = "16px";
     var table = el("table"), head = el("tr");
-    add(head, el("th", null, "Prompt"), el("th", null, "Model"));
-    ["A", "B", "Change", "Regressions", "Fixes"].forEach(function (h) { head.appendChild(el("th", "num", h)); });
+    add(head, el("th", null, "Prompt"), el("th", null, "Model"), el("th", "num", "Before"), el("th", "num", "After"),
+      el("th", "num", "Change"), el("th", "num", "Got worse"), el("th", "num", "Got better"));
     add(table, add(el("thead"), head));
     var body = el("tbody");
     data.groups.forEach(function (g) {
       var tr = el("tr");
-      var delta = g.pass_rate_delta * 100;
-      var change = el("td", "num " + (delta < 0 ? "down" : delta > 0 ? "up" : "muted"),
-        delta === 0 ? "0.0 pts" : (delta > 0 ? "+" : "") + delta.toFixed(1) + " pts");
-      add(tr, el("td", "mono", g.prompt_id), el("td", "mono", g.model_id),
-        el("td", "num", pct(g.pass_rate_a) + " (" + g.passed_a + "/" + g.cases + ")"),
-        el("td", "num", pct(g.pass_rate_b) + " (" + g.passed_b + "/" + g.cases + ")"),
+      var diff = g.passed_b - g.passed_a;
+      var change = el("td", "num " + (diff < 0 ? "down" : diff > 0 ? "up" : "muted"), diff === 0 ? "no change" : (diff > 0 ? "+" : "") + diff + " right");
+      add(tr, el("td", null, g.prompt_id), el("td", null, g.model_id),
+        el("td", "num", g.passed_a + " of " + g.cases), el("td", "num", g.passed_b + " of " + g.cases),
         change, el("td", "num", String(g.regressions)), el("td", "num", String(g.fixes)));
       body.appendChild(tr);
     });
     table.appendChild(body); wrap.appendChild(table); top.appendChild(wrap);
     out.appendChild(top);
-    if (data.regressions.length) out.appendChild(changesTable("Regressions: passed in A, fail in B", data.regressions, "Why it fails now"));
-    if (data.fixes.length) out.appendChild(changesTable("Fixes: failed in A, pass in B", data.fixes, "Why it failed before"));
+    if (data.regressions.length) out.appendChild(changesTable("Got worse (" + data.regressions.length + ")",
+      "These were right before and are wrong now. The last column says why they fail now.", data.regressions));
+    if (data.fixes.length) out.appendChild(changesTable("Got better (" + data.fixes.length + ")",
+      "These were wrong before and are right now. The last column says why they used to fail.", data.fixes));
   }
   $("cmp-go").addEventListener("click", runCompare);
 
   // ---------- start ----------
-  api("/api/status").then(function (s) { $("where").textContent = s.root; }).catch(function () {});
   showTab(location.hash.slice(1) || "lab");
   loadExperiments().catch(function (error) { setError("exp-error", error.message); });
 })();

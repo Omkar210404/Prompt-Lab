@@ -146,7 +146,9 @@ def create_app(root: str | Path = ".", runs_dir: str | Path | None = None,
 
     def runner_for(loaded: LoadedExperiment, selection: Selection) -> Runner:
         cache = ResponseCache(cache_dir, enabled=loaded.experiment.run.cache and selection.use_cache)
-        options = RunOptions(model_ids=selection.models)
+        # Ticking every model is not a filter, so the run is not marked as partial.
+        everything = {m.id for m in loaded.experiment.models}
+        options = RunOptions(model_ids=[] if set(selection.models) == everything else selection.models)
         return Runner(loaded, cache, prices=load_prices(loaded.prices_path), options=options)
 
     async def model_status(loaded: LoadedExperiment) -> list[dict[str, Any]]:

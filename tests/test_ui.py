@@ -51,7 +51,7 @@ async def run_all(client, **body) -> dict:
 async def test_index_is_the_app_with_inputs_and_run_buttons(client):
     page = (await client.get("/")).text
     assert "<title>prompt-lab</title>" in page
-    for control in ('id="experiment"', 'id="prompts"', 'id="try"', "Run this input", 'id="run-all"', "Run all cases"):
+    for control in ('id="experiment"', 'id="prompts"', 'id="try"', "Test this example", 'id="run-all"', "Run the full test"):
         assert control in page
     assert (await client.get("/favicon.svg")).headers["content-type"].startswith("image/svg+xml")
     assert (await client.get("/api/status")).json()["version"]
@@ -178,6 +178,16 @@ async def test_unnamed_run_gets_a_timestamped_id_and_runs_are_listed_newest_firs
     listed = (await client.get("/api/runs")).json()
     assert {run["run_id"] for run in listed} == {"older", second["run_id"]}
     assert listed[0]["cells"] == 6 and listed[0]["mock"] is True and listed[0]["pass_rate"] == 0.5
+
+
+async def test_ticking_every_model_is_not_a_partial_run(write_experiment, tmp_path):
+    write_experiment({"models": [MOCK, {"id": "m2", "provider": "mock"}]})
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=create_app(tmp_path)), base_url=BASE) as http:
+        await run_all(http, name="all", models=["m1", "m2"])
+        await run_all(http, name="one", models=["m2"])
+        runs = {run["run_id"]: run for run in (await http.get("/api/runs")).json()}
+        assert runs["all"]["partial"] is False and runs["all"]["cells"] == 12
+        assert runs["one"]["partial"] is True and runs["one"]["cells"] == 6
 
 
 @pytest.mark.parametrize("name", ["../escape", "a/b", "with space"])
