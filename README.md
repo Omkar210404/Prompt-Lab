@@ -6,7 +6,7 @@
 
 A small evaluation tool for LLM prompts. It runs several prompt variants (and optionally several models) over a test set, scores every output with pluggable scorers, saves the run, and shows the results side by side. It can also diff two runs and list the cases that passed before and fail now. Use it from a local web app or from the command line.
 
-![The prompt-lab web app: an experiment with three editable prompt variants and two models](docs/screenshots/app-lab.png)
+![The prompt-lab web app: pick a task, edit the prompt versions, choose the model](docs/screenshots/app-lab.png)
 
 > **The screenshots and numbers in this README are mock results.** They come from a scripted, offline mock provider, not from a real model. They show how the tool works. They are not a benchmark of any model. See [What the demo is](#what-the-demo-is).
 
@@ -32,7 +32,7 @@ Changing a prompt is easy. Knowing whether the change made things better is not.
 - **Saves every run.** `results.jsonl` plus `summary.json`, with the config hash and timestamp.
 - **Reports.** A terminal table, and a self-contained HTML report with a chart, a side-by-side grid, a per-case drill-down and the worst failures.
 - **Compares two runs** and lists regressions, with a `--fail-on-regression` exit code for CI.
-- **Runs offline.** A deterministic mock provider drives the demo and all 278 tests. No key or network is needed.
+- **Runs offline.** A deterministic mock provider drives the demo and all 279 tests. No key or network is needed.
 
 ## Quick start
 
@@ -57,20 +57,24 @@ prompt-lab ui
 prompt-lab is running at http://127.0.0.1:8321  (press Ctrl+C to stop)
 ```
 
-It opens in your browser and lists the experiment files in the current folder and in `examples/`. The demo experiments use the mock provider, so they need no API key. The page has four steps:
+It opens in your browser. The page is written for someone who has never used the tool: it uses plain words ("examples", "checks", "got worse") and keeps the technical details behind **Details** and **Advanced**. The demo tasks use the mock provider, shown in the app as **Demo mode**, so they need no API key.
 
-1. **Prompts.** Each variant is a card you can edit, rename, remove or copy. Edits stay in the page; they are not written back to the experiment file.
-2. **Models.** Tick the models to run. A model whose API key is not set is shown as unavailable, with the reason.
-3. **Try one input.** Type an input or load a test case, set the expected answer, and press **Run this input**. Each variant's output appears side by side with its verdict and the reason from every scorer.
-4. **Run the whole test set.** Shows how many calls the run will make and how many are cached, then runs with a progress bar. The run is saved, with the prompts as you edited them.
+Pick a task at the top, then follow four steps:
 
-![Trying one input: the email, the expected answer, and three prompt variants with their outputs and scorer reasons](docs/screenshots/app-try.png)
+1. **Your prompts.** Each version is a box you can edit, rename, remove or copy. Edits stay in the page; they are not written back to the experiment file.
+2. **Which AI answers.** Tick the models to use. A model whose API key is not set is shown as not ready.
+3. **Quick test on one example.** Pick an example or write your own, and press **Test this example**. Each prompt's answer appears side by side, marked Passed or Failed, with every check listed in plain words.
+4. **Full test on all examples.** Press **Run the full test**. A progress bar runs, then the page names the best prompt and shows a bar for each one, with its most common problem. The test is saved, with the prompts as you edited them.
 
-The **Runs** tab lists saved runs and opens the full report for each. The **Compare** tab diffs two runs:
+![Quick test on one example: the email, the correct answer, and three prompt versions marked Passed or Failed with the checks listed](docs/screenshots/app-try.png)
 
-![Comparing two runs in the web app: 14 regressions after a prompt was shortened](docs/screenshots/app-compare.png)
+![Full test result: the best prompt named, and a bar per prompt with its most common problem](docs/screenshots/app-results.png)
 
-With the mock models, the answer does not depend on the text you type. The mock builds it from the expected answer and the scripted rules, and the app says so next to the input box. What does change the result is the wording of your prompts, because some rules look for it. Add `Respond with only a JSON object.` to `v1_bare`, press **Run all cases**, and its pass rate for `mock-careful` goes from 8/24 to 14/24. To have your typed input read and answered, use a real model: see [Using a real model](#using-a-real-model).
+The **History** tab lists saved tests and opens the full report for each. The **Compare** tab shows what got worse and what got better between two tests:
+
+![Comparing two tests in the web app: 14 answers got worse after a prompt was shortened](docs/screenshots/app-compare.png)
+
+In demo mode, the answer does not depend on the text you type. The mock builds it from the correct answer and the scripted rules, and the app says so next to the input box. What does change the result is the wording of your prompts, because some rules look for it. In the "Support email extraction" task, add `Respond with only a JSON object.` to `v1_bare`, press **Run the full test**, and it goes from 8 of 24 right to 14 of 24 for `mock-careful`. To have your typed input read and answered, use a real model: see [Using a real model](#using-a-real-model).
 
 The app is for your own machine. It listens on `127.0.0.1` only and refuses requests that come from other sites' pages, because a run can spend money on model calls.
 
@@ -525,7 +529,7 @@ pytest -q
 ```
 
 ```text
-278 passed in 23.97s
+279 passed in 27.03s
 ```
 
 Every test runs offline. A fixture refuses any network connection that leaves the machine, so a test that tried to reach an API would fail. Covered: each scorer, the runner (concurrency limits, timeouts, retries, error containment), the cache, cost estimation, storage, the HTML report (including escaping of hostile model output), `compare`, the CLI end to end, and the web app's server (trying an input, edited prompts, background runs, and refusing cross-site requests). The web page itself was checked by hand and with a scripted browser session, not by the test suite. GitHub Actions runs the tests and the mock demo on every push.
